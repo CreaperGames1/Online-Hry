@@ -1,64 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Christmas Page</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photos</title>
 </head>
 <body>
-  <!-- Welcome text at top center -->
-  <h1 id="welcomeMessage" class="welcome-text"></h1>
+    <h1>Photos</h1>
+    <p>This is a simple photos page</p>
+    <link rel="stylesheet" href="catphotos.html">
 
-  <!-- Window with YouTube logo in top-left corner -->
-  <div class="window">
-    <a href="https://www.youtube.com/@SongsAreINfinite" target="_blank" class="youtube-logo">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/b/b8/YouTube_Logo_2017.svg" alt="YouTube Logo">
-    </a>
-  </div>
-
-  <!-- Christmas tree -->
-  <div class="tree">
-    <div class="tree-top"></div>
-    <div class="tree-middle"></div>
-    <div class="tree-bottom"></div>
-    <div class="trunk"></div>
-  </div>
-
-  <!-- Canvas for snow -->
-  <canvas id="snow"></canvas>
-
-  <!-- Buttons for login / register -->
-  <button class="login-btn" onclick="openLogin()">Login</button>
-  <button class="register-btn" onclick="openRegister()">Register</button>
-
-  <!-- Logout button -->
-  <button id="logoutBtn" onclick="logout()" style="display:none;">Logout</button>
-
-  <!-- Login popup -->
-  <div class="login-popup" id="loginPopup">
-    <h2>Login</h2>
-    <input type="text" id="username" placeholder="Username">
-    <input type="password" id="password" placeholder="Password">
-    <label>
-      <input type="checkbox" id="stayLogged"> Stay logged in
-    </label>
-    <button onclick="login()">Login</button>
-    <button onclick="closeLogin()">Close</button>
-    <p id="loginMessage" style="color:red;"></p>
-    <p>Don't have an account? <span class="link" onclick="openRegister()">Register here</span></p>
-  </div>
-
-  <!-- Registration popup -->
-  <div class="login-popup" id="registerPopup">
-    <h2>Register</h2>
-    <input type="text" id="newUsername" placeholder="Username">
-    <input type="password" id="newPassword" placeholder="Password">
-    <button onclick="register()">Register</button>
-    <button onclick="closeRegister()">Close</button>
-    <p id="registerMessage" style="color:red;"></p>
-  </div>
-
-  <script src="script.js"></script>
 </body>
 </html>
