@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TomasekPlays — YouTube</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #FF0000;
+    --red-glow: #FF000066;
+    --dark: #0a0a0a;
+    --darker: #050505;
+    --surface: #111111;
+    --surface2: #1a1a1a;
+    --border: #222;
+    --text: #f0f0f0;
+    --muted: #666;
+    --accent: #FF3333;
+    --gold: #FFD700;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--darker);
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Custom cursor */
+  .cursor {
+    position: fixed;
+    width: 12px;
+    height: 12px;
+    background: var(--red);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transition: transform 0.1s ease;
+    mix-blend-mode: screen;
+  }
+  .cursor-ring {
+    position: fixed;
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--red);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9998;
+    transition: transform 0.15s ease, width 0.2s, height 0.2s;
+    opacity: 0.6;
+  }
+
+  /* Noise texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.4;
+  }
+
+  /* Scanlines */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.03) 2px,
+      rgba(0,0,0,0.03) 4px
+    );
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  /* ─── HEADER / BANNER ─── */
+  .banner {
+    position: relative;
+    height: 280px;
+    overflow: hidden;
+    background: var(--dark);
+  }
+
+  .banner-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 100%, rgba(255,0,0,0.18) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 20% 50%, rgba(255,0,0,0.08) 0%, transparent 60%),
+      linear-gradient(135deg, #0a0a0a 0%, #111 50%, #0d0d0d 100%);
+  }
+
+  .banner-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,0,0,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,0,0,0.06) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: linear-gradient(to bottom, transparent, black 30%, black 70%, transparent);
+    animation: gridMove 20s linear infinite;
+  }
+
+  @keyframes gridMove {
+    from { transform: translateY(0); }
+    to { transform: translateY(60px); }
+  }
+
+  .banner-content {
+    position: relative;
+    z-index: 2;
+    height: 100%;
+    display: flex;
+    align-items: flex-end;
+    padding: 0 40px 0;
+  }
+
+  .banner-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(60px, 10vw, 110px);
+    letter-spacing: 4px;
+    line-height: 0.9;
+    color: var(--text);
+    text-shadow:
+      0 0 40px rgba(255,0,0,0.5),
+      0 0 80px rgba(255,0,0,0.2),
+      4px 4px 0px rgba(255,0,0,0.3);
+    animation: titleFlicker 8s ease-in-out infinite;
+  }
+
+  @keyframes titleFlicker {
+    0%, 96%, 100% { opacity: 1; }
+    97% { opacity: 0.85; }
+    98% { opacity: 1; }
+    99% { opacity: 0.9; }
+  }
+
+  .banner-title span { color: var(--red); }
+
+  .banner-decoration {
+    position: absolute;
+    right: 40px;
+    bottom: 40px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    text-align: right;
+    line-height: 1.8;
+  }
+
+  .banner-decoration .live-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    background: var(--red);
+    border-radius: 50%;
+    margin-right: 6px;
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(255,0,0,0.6); }
+    50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(255,0,0,0); }
+  }
+
+  /* ─── CHANNEL INFO ─── */
+  .channel-info {
+    background: var(--dark);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 40px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    position: relative;
+  }
+
+  .avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--red) 0%, #660000 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 2px;
+    flex-shrink: 0;
+    border: 2px solid var(--red);
+    box-shadow: 0 0 20px var(--red-glow);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .avatar::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+    border-radius: 50%;
+  }
+
+  .channel-meta { flex: 1; }
+  .channel-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 2px;
+    color: var(--text);
+  }
+  .channel-handle {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .channel-stats {
+    display: flex;
+    gap: 24px;
+    margin-top: 8px;
+  }
+  .stat {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .stat strong {
+    color: var(--text);
+    font-size: 15px;
+    display: block;
+  }
+
+  .sub-btn {
+    background: var(--red);
+    color: white;
+    border: none;
+    padding: 10px 28px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: none;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.1s ease, box-shadow 0.2s ease;
+    clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+  }
+
+  .sub-btn:hover {
+    transform: scale(1.04);
+    box-shadow: 0 0 30px rgba(255,0,0,0.5);
+  }
+
+  .sub-btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.4s ease;
+  }
+
+  .sub-btn:hover::after { transform: translateX(100%); }
+
+  /* ─── NAV TABS ─── */
+  .nav-tabs {
+    background: var(--dark);
+    border-bottom: 1px solid var(--border);
+    padding: 0 40px;
+    display: flex;
+    gap: 0;
+  }
+
+  .tab {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 14px 20px;
+    color: var(--muted);
+    cursor: none;
+    border-bottom: 2px solid transparent;
+    transition: color 0.2s, border-color 0.2s;
+    position: relative;
+  }
+
+  .tab.active {
+    color: var(--text);
+    border-bottom-color: var(--red);
+  }
+
+  .tab:hover:not(.active) { color: var(--text); }
+
+  /* ─── MAIN CONTENT ─── */
+  .main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px 40px;
+  }
+
+  /* ─── FEATURED / HERO VIDEO ─── */
+  .featured {
+    margin-bottom: 50px;
+    position: relative;
+  }
+
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--red);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, var(--red), transparent);
+  }
+
+  .featured-card {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    position: relative;
+  }
+
+  .featured-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 1px solid rgba(255,0,0,0.15);
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .thumb-wrap {
+    position: relative;
+    aspect-ratio: 16/9;
+    overflow: hidden;
+    background: #000;
+    cursor: none;
+  }
+
+  .thumb-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #111 0%, #1a1a1a 100%);
+    position: relative;
+  }
+
+  .play-icon {
+    width: 70px;
+    height: 70px;
+    background: rgba(255,0,0,0.9);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 0 40px rgba(255,0,0,0.3);
+    position: relative;
+    z-index: 2;
+  }
+
+  .thumb-wrap:hover .play-icon {
+    transform: scale(1.1);
+    box-shadow: 0 0 60px rgba(255,0,0,0.6);
+  }
+
+  .play-icon svg { width: 28px; margin-left: 5px; fill: white; }
+
+  .thumb-game-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 30% 50%, rgba(255,100,0,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 30%, rgba(255,0,0,0.08) 0%, transparent 50%);
+  }
+
+  .thumb-label {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: var(--red);
+    color: white;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    padding: 3px 8px;
+    z-index: 3;
+  }
+
+  .thumb-duration {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: rgba(0,0,0,0.85);
+    color: white;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 2px 6px;
+    z-index: 3;
+  }
+
+  .featured-info {
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border-left: 1px solid var(--border);
+  }
+
+  .game-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--red);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    background: rgba(255,0,0,0.08);
+    border: 1px solid rgba(255,0,0,0.2);
+    padding: 3px 10px;
+    display: inline-block;
+    margin-bottom: 14px;
+    width: fit-content;
+  }
+
+  .video-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    letter-spacing: 2px;
+    line-height: 1.1;
+    color: var(--text);
+    margin-bottom: 14px;
+  }
+
+  .video-desc {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 20px;
+    font-weight: 500;
+  }
+
+  .video-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    display: flex;
+    gap: 16px;
+  }
+
+  .video-meta span { display: flex; align-items: center; gap: 5px; }
+
+  /* ─── VIDEO GRID ─── */
+  .video-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-bottom: 50px;
+  }
+
+  .video-card {
+    background: var(--surface);
+    cursor: none;
+    position: relative;
+    overflow: hidden;
+    transition: z-index 0s;
+  }
+
+  .video-card:hover { z-index: 10; }
+  .video-card:hover .card-thumb { filter: brightness(1.1); }
+  .video-card:hover .card-overlay { opacity: 1; }
+
+  .card-thumb {
+    aspect-ratio: 16/9;
+    background: var(--surface2);
+    position: relative;
+    overflow: hidden;
+    transition: filter 0.2s ease;
+  }
+
+  .card-thumb-bg {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .card-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(255,0,0,0.12);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mini-play {
+    width: 44px;
+    height: 44px;
+    background: rgba(255,0,0,0.9);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mini-play svg { width: 16px; margin-left: 3px; fill: white; }
+
+  .card-dur {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    background: rgba(0,0,0,0.85);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: white;
+    padding: 2px 5px;
+  }
+
+  .card-body { padding: 14px 16px; }
+
+  .card-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: var(--text);
+    line-height: 1.3;
+    margin-bottom: 8px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .card-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .card-views { color: rgba(255,200,200,0.5); }
+
+  /* ─── ABOUT / SIDEBAR SECTION ─── */
+  .two-col {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 40px;
+  }
+
+  .about-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 30px;
+  }
+
+  .about-heading {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px;
+    letter-spacing: 2px;
+    margin-bottom: 16px;
+    color: var(--text);
+  }
+
+  .about-text {
+    color: var(--muted);
+    font-size: 15px;
+    line-height: 1.7;
+    font-weight: 500;
+  }
+
+  .about-text strong { color: var(--text); }
+
+  .links-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .link-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border: 1px solid var(--border);
+    text-decoration: none;
+    color: var(--text);
+    font-weight: 600;
+    letter-spacing: 1px;
+    font-size: 14px;
+    transition: border-color 0.2s, background 0.2s;
+    cursor: none;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .link-item::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(255,0,0,0.05), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+
+  .link-item:hover { border-color: rgba(255,0,0,0.4); }
+  .link-item:hover::before { transform: translateX(0); }
+
+  .link-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 16px;
+  }
+
+  .yt-icon { background: #FF0000; }
+  .rb-icon { background: #00B2FF; }
+
+  /* ─── STATS TICKER ─── */
+  .stats-bar {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+    margin-bottom: 50px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+  }
+
+  .ticker-track {
+    display: flex;
+    gap: 0;
+    animation: ticker 20s linear infinite;
+    white-space: nowrap;
+  }
+
+  @keyframes ticker {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  .ticker-item {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 1.5px;
+    padding: 0 40px;
+    border-right: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .ticker-item strong { color: var(--red); }
+
+  /* ─── ANIMATIONS ON LOAD ─── */
+  .fade-up {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeUp 0.6s ease forwards;
+  }
+
+  @keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .featured { animation-delay: 0.1s; }
+
+  /* Thumb color variations per video */
+  .c1 { background: linear-gradient(135deg, #1a0000, #330000); }
+  .c2 { background: linear-gradient(135deg, #0d0d1a, #1a1a33); }
+  .c3 { background: linear-gradient(135deg, #001a00, #003300); }
+  .c4 { background: linear-gradient(135deg, #1a0a00, #331500); }
+  .c5 { background: linear-gradient(135deg, #0a001a, #15003d); }
+  .c6 { background: linear-gradient(135deg, #1a1a00, #333300); }
+
+  .thumb-icon {
+    font-size: 42px;
+    opacity: 0.3;
+    filter: grayscale(0.5);
+  }
+
+  /* ─── COUNTDOWN BANNERS ─── */
+  .countdown-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-bottom: 50px;
+  }
+
+  .countdown-card {
+    background: var(--surface);
+    padding: 28px 30px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .countdown-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  .countdown-card.upload::before { background: linear-gradient(90deg, var(--red), transparent); }
+  .countdown-card.live-card::before { background: linear-gradient(90deg, #00ff88, transparent); }
+
+  .countdown-card .bg-glow {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .upload .bg-glow {
+    background: radial-gradient(ellipse 60% 80% at 0% 50%, rgba(255,0,0,0.05) 0%, transparent 70%);
+  }
+  .live-card .bg-glow {
+    background: radial-gradient(ellipse 60% 80% at 0% 50%, rgba(0,255,136,0.05) 0%, transparent 70%);
+  }
+
+  .cd-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .upload .cd-label { color: var(--red); }
+  .live-card .cd-label { color: #00ff88; }
+
+  .cd-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+
+  .upload .cd-dot { background: var(--red); box-shadow: 0 0 6px var(--red); }
+  .live-card .cd-dot { background: #00ff88; box-shadow: 0 0 6px #00ff88;
+    animation: pulseGreen 1.5s ease-in-out infinite; }
+
+  @keyframes pulseGreen {
+    0%,100% { opacity:1; box-shadow: 0 0 0 0 rgba(0,255,136,0.6); }
+    50% { opacity:0.7; box-shadow: 0 0 0 6px rgba(0,255,136,0); }
+  }
+
+  .cd-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 2px;
+    color: var(--text);
+    margin-bottom: 18px;
+  }
+
+  .cd-digits {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+  }
+
+  .cd-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .cd-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    line-height: 1;
+    min-width: 60px;
+    text-align: center;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 6px 10px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .upload .cd-num { color: var(--red); border-color: rgba(255,0,0,0.2); }
+  .live-card .cd-num { color: #00ff88; border-color: rgba(0,255,136,0.2); }
+
+  .cd-num::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0;
+    top: 50%;
+    height: 1px;
+    background: rgba(255,255,255,0.04);
+  }
+
+  .cd-unit {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    margin-top: 5px;
+    text-transform: uppercase;
+  }
+
+  .cd-sep {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 40px;
+    color: var(--muted);
+    margin-bottom: 18px;
+    opacity: 0.4;
+  }
+
+  .cd-sub {
+    margin-top: 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+
+  /* ── CHANGE THE TIMER HERE ──────────────────────────────────────────
+     Find the JS section at the bottom of the file.
+     Look for these two lines:
+
+       const UPLOAD_TARGET = new Date(Date.now() + 10 * 3600 * 1000);
+       const LIVE_TARGET   = new Date(Date.now() + 10 * 3600 * 1000);
+
+     Change the number before  * 3600 * 1000  to set hours.
+     Example: for 5 hours → 5 * 3600 * 1000
+     Or set an exact date like: new Date('2026-03-28T20:00:00')
+  ─────────────────────────────────────────────────────────────────── */
+
+  @media (max-width: 900px) {
+    .featured-card { grid-template-columns: 1fr; }
+    .featured-info { border-left: none; border-top: 1px solid var(--border); }
+    .two-col { grid-template-columns: 1fr; }
+    .channel-info { flex-wrap: wrap; }
+    .banner-content { padding: 0 20px; }
+    .main { padding: 30px 20px; }
+    .nav-tabs { padding: 0 20px; overflow-x: auto; }
+    .channel-info { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- ─── BANNER ─── -->
+<div class="banner">
+  <div class="banner-bg"></div>
+  <div class="banner-grid"></div>
+  <div class="banner-content">
+    <h1 class="banner-title">Tomasek<span>Plays</span></h1>
+  </div>
+  <div class="banner-decoration">
+    <div><span class="live-dot"></span>CHANNEL ACTIVE</div>
+    <div>EST. 2024 · CZECH REPUBLIC</div>
+    <div>@TOMASEKPLAYS</div>
+  </div>
+</div>
+
+<!-- ─── CHANNEL INFO ─── -->
+<div class="channel-info">
+  <div class="avatar">TP</div>
+  <div class="channel-meta">
+    <div class="channel-name">TomasekPlays</div>
+    <div class="channel-handle">@TomasekPlays · youtube.com/@TomasekPlays</div>
+    <div class="channel-stats">
+      <div class="stat"><strong>ROBLOX</strong>Gaming</div>
+      <div class="stat"><strong>ID</strong>Tomas484818</div>
+      <div class="stat"><strong>GROUP</strong>35844898</div>
+    </div>
+  </div>
+  <a href="https://www.youtube.com/@TomasekPlays" target="_blank" class="sub-btn">▶ SUBSCRIBE</a>
+</div>
+
+<!-- ─── NAV TABS ─── -->
+<div class="nav-tabs">
+  <div class="tab active">VIDEOS</div>
+  <div class="tab">SHORTS</div>
+  <div class="tab">PLAYLISTS</div>
+  <div class="tab">COMMUNITY</div>
+  <div class="tab">ABOUT</div>
+</div>
+
+<!-- ─── STATS TICKER ─── -->
+<div class="stats-bar">
+  <div class="ticker-track">
+    <div class="ticker-item">🎮 <strong>ROBLOX</strong> CONTENT</div>
+    <div class="ticker-item">📺 CHANNEL: <strong>@TomasekPlays</strong></div>
+    <div class="ticker-item">🎯 USER ID: <strong>7856781488</strong></div>
+    <div class="ticker-item">👥 GROUP: <strong>#35844898</strong></div>
+    <div class="ticker-item">⚡ CZECH REPUBLIC CREATOR</div>
+    <div class="ticker-item">🔥 NEW VIDEOS DROPPING</div>
+    <!-- repeat for seamless loop -->
+    <div class="ticker-item">🎮 <strong>ROBLOX</strong> CONTENT</div>
+    <div class="ticker-item">📺 CHANNEL: <strong>@TomasekPlays</strong></div>
+    <div class="ticker-item">🎯 USER ID: <strong>7856781488</strong></div>
+    <div class="ticker-item">👥 GROUP: <strong>#35844898</strong></div>
+    <div class="ticker-item">⚡ CZECH REPUBLIC CREATOR</div>
+    <div class="ticker-item">🔥 NEW VIDEOS DROPPING</div>
+  </div>
+</div>
+
+<!-- ─── COUNTDOWN TIMERS ─── -->
+<div style="max-width:1400px;margin:0 auto;padding:40px 40px 0;">
+  <div class="section-label">// UPCOMING EVENTS</div>
+  <div class="countdown-row" style="margin-top:16px;">
+
+    <!-- UPLOAD COUNTDOWN -->
+    <div class="countdown-card upload">
+      <div class="bg-glow"></div>
+      <div class="cd-label"><span class="cd-dot"></span>UPLOADING IN</div>
+      <div class="cd-title">📹 NEW VIDEO DROPPING</div>
+      <div class="cd-digits">
+        <div class="cd-block">
+          <div class="cd-num" id="u-h">00</div>
+          <div class="cd-unit">hours</div>
+        </div>
+        <div class="cd-sep">:</div>
+        <div class="cd-block">
+          <div class="cd-num" id="u-m">00</div>
+          <div class="cd-unit">min</div>
+        </div>
+        <div class="cd-sep">:</div>
+        <div class="cd-block">
+          <div class="cd-num" id="u-s">00</div>
+          <div class="cd-unit">sec</div>
+        </div>
+      </div>
+      <div class="cd-sub" id="u-status">⏳ Připravuji nové video...</div>
+    </div>
+
+    <!-- LIVE COUNTDOWN -->
+    <div class="countdown-card live-card">
+      <div class="bg-glow"></div>
+      <div class="cd-label"><span class="cd-dot"></span>LIVE IN</div>
+      <div class="cd-title">🔴 LIVE STREAM ZAČÍNÁ</div>
+      <div class="cd-digits">
+        <div class="cd-block">
+          <div class="cd-num" id="l-h">00</div>
+          <div class="cd-unit">hours</div>
+        </div>
+        <div class="cd-sep">:</div>
+        <div class="cd-block">
+          <div class="cd-num" id="l-m">00</div>
+          <div class="cd-unit">min</div>
+        </div>
+        <div class="cd-sep">:</div>
+        <div class="cd-block">
+          <div class="cd-num" id="l-s">00</div>
+          <div class="cd-unit">sec</div>
+        </div>
+      </div>
+      <div class="cd-sub" id="l-status">⏳ Stream se brzy spustí...</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ─── MAIN CONTENT ─── -->
+<div class="main">
+
+  <!-- FEATURED VIDEO -->
+  <div class="featured fade-up">
+    <div class="section-label">// LATEST UPLOAD</div>
+    <div class="featured-card">
+      <div class="thumb-wrap">
+        <div class="thumb-placeholder c1">
+          <div class="thumb-game-bg"></div>
+          <div class="play-icon">
+            <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          </div>
+        </div>
+        <div class="thumb-label">NEW</div>
+        <div class="thumb-duration">14:32</div>
+      </div>
+      <div class="featured-info">
+        <div class="game-tag">ROBLOX</div>
+        <div class="video-title">EPIC MOMENTS IN ROBLOX #1</div>
+        <div class="video-desc">
+          Nejlepší momenty ze mých Roblox session! Sledujte jak procházím různé hry, 
+          plním výzvy a bavím se s komunitou. Nezapomeňte se přihlásit k odběru!
+        </div>
+        <div class="video-meta">
+          <span>👁 views</span>
+          <span>👍 likes</span>
+          <span>🕐 recently</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIDEO GRID -->
+  <div class="section-label">// ALL VIDEOS</div>
+  <div class="video-grid" style="margin-top:16px;">
+
+    <div class="video-card">
+      <div class="card-thumb">
+        <div class="card-thumb-bg c2"><span class="thumb-icon">🏰</span></div>
+        <div class="card-overlay"><div class="mini-play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div></div>
+        <div class="card-dur">12:47</div>
+      </div>
+      <div class="card-body">
+        <div class="card-title">Roblox Obby Challenge — Can I Win?</div>
+        <div class="card-meta"><span class="card-views">👁 Views</span><span>TomasekPlays</span></div>
+      </div>
+    </div>
+
+    <div class="video-card">
+      <div class="card-thumb">
+        <div class="card-thumb-bg c3"><span class="thumb-icon">⚔️</span></div>
+        <div class="card-overlay"><div class="mini-play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div></div>
+        <div class="card-dur">8:21</div>
+      </div>
+      <div class="card-body">
+        <div class="card-title">PvP Battle — Kdo vyhraje?!</div>
+        <div class="card-meta"><span class="card-views">👁 Views</span><span>TomasekPlays</span></div>
+      </div>
+    </div>
+
+    <div class="video-card">
+      <div class="card-thumb">
+        <div class="card-thumb-bg c4"><span class="thumb-icon">🏆</span></div>
+        <div class="card-overlay"><div class="mini-play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div></div>
+        <div class="card-dur">20:03</div>
+      </div>
+      <div class="card-body">
+        <div class="card-title">Top 10 Roblox Games 2024</div>
+        <div class="card-meta"><span class="card-views">👁 Views</span><span>TomasekPlays</span></div>
+      </div>
+    </div>
+
+    <div class="video-card">
+      <div class="card-thumb">
+        <div class="card-thumb-bg c5"><span class="thumb-icon">🚀</span></div>
+        <div class="card-overlay"><div class="mini-play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div></div>
+        <div class="card-dur">6:55</div>
+      </div>
+      <div class="card-body">
+        <div class="card-title">Roblox Space Game — WILD</div>
+        <div class="card-meta"><span class="card-views">👁 Views</span><span>TomasekPlays</span></div>
+      </div>
+    </div>
+
+    <div class="video-card">
+      <div class="card-thumb">
+        <div class="card-thumb-bg c6"><span class="thumb-icon">💎</span></div>
+        <div class="card-overlay"><div class="mini-play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div></div>
+        <div class="card-dur">15:12</div>
+      </div>
+      <div class="card-body">
+        <div class="card-title">Farming Robux — Grind Session</div>
+        <div class="card-meta"><span class="card-views">👁 Views</span><span>TomasekPlays</span></div>
+      </div>
+    </div>
+
+    <div class="video-card">
+      <div class="card-thumb">
+        <div class="card-thumb-bg c1"><span class="thumb-icon">👻</span></div>
+        <div class="card-overlay"><div class="mini-play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div></div>
+        <div class="card-dur">9:40</div>
+      </div>
+      <div class="card-body">
+        <div class="card-title">Horror Roblox — Nebudu spát 😱</div>
+        <div class="card-meta"><span class="card-views">👁 Views</span><span>TomasekPlays</span></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ABOUT + LINKS -->
+  <div class="two-col">
+    <div class="about-box">
+      <div class="about-heading">O KANÁLU</div>
+      <p class="about-text">
+        Vítejte na <strong>TomasekPlays</strong> — českém herním kanálu zaměřeném principalmente na 
+        <strong>Roblox</strong>! Jsem Tomas Tersago a tvořím obsah, který vás pobaví, 
+        rozesměje a nadchne.<br><br>
+        Přidejte se do mé Roblox skupiny (<strong>#35844898</strong>) a hrajte se mnou!
+        Najdete mě v Robloxu pod přezdívkou <strong>Tomas484818</strong> (ID: 7856781488).
+        <br><br>
+        Nezapomeňte dát <strong>LIKE</strong>, <strong>SUBSCRIBE</strong> a zapnout 🔔 notifikace!
+      </p>
+    </div>
+    <div class="links-box">
+      <div class="about-heading">LINKY</div>
+      <a href="https://www.youtube.com/@TomasekPlays" target="_blank" class="link-item">
+        <div class="link-icon yt-icon">▶</div>
+        YouTube Channel
+      </a>
+      <a href="https://www.roblox.com/users/7856781488/profile" target="_blank" class="link-item">
+        <div class="link-icon rb-icon" style="font-size:13px;font-weight:700;">R</div>
+        Roblox Profile
+      </a>
+      <a href="https://www.roblox.com/groups/35844898" target="_blank" class="link-item">
+        <div class="link-icon rb-icon" style="font-size:13px;font-weight:700;">G</div>
+        Roblox Group
+      </a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // ══════════════════════════════════════════════════════════
+  // ▼▼▼  ZDE NASTAV ČAS TIMERU  ▼▼▼
+  //
+  //  Změň číslo hodin (10) na kolik chceš:
+  //    10 * 3600 * 1000  →  countdown 10 hodin od teď
+  //
+  //  Nebo zadej přesné datum/čas takto:
+  //    new Date('2026-03-28T20:00:00')   ← rok-měsíc-denThodina:minuta:sekunda
+  //
+  const UPLOAD_TARGET = new Date(Date.now() + 10 * 3600 * 1000); // ← UPLOAD: změň "10"
+  const LIVE_TARGET   = new Date(Date.now() + 10 * 3600 * 1000); // ← LIVE:   změň "10"
+  //
+  // ▲▲▲  KONEC NASTAVENÍ  ▲▲▲
+  // ══════════════════════════════════════════════════════════
+
+  function pad(n) { return String(Math.max(0,n)).padStart(2,'0'); }
+
+  function updateCountdown(target, hEl, mEl, sEl, statusEl, doneUpload, doneLive) {
+    const now  = Date.now();
+    const diff = target - now;
+    if (diff <= 0) {
+      hEl.textContent = '00';
+      mEl.textContent = '00';
+      sEl.textContent = '00';
+      statusEl.textContent = doneLive ? '🔴 LIVE PRÁVĚ TEĎ!' : '✅ VIDEO JE VENKU!';
+      statusEl.style.color = doneLive ? '#00ff88' : '#ff4444';
+      return;
+    }
+    const h = Math.floor(diff / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    hEl.textContent = pad(h);
+    mEl.textContent = pad(m);
+    sEl.textContent = pad(s);
+  }
+
+  function tick() {
+    updateCountdown(UPLOAD_TARGET,
+      document.getElementById('u-h'),
+      document.getElementById('u-m'),
+      document.getElementById('u-s'),
+      document.getElementById('u-status'),
+      false, false);
+    updateCountdown(LIVE_TARGET,
+      document.getElementById('l-h'),
+      document.getElementById('l-m'),
+      document.getElementById('l-s'),
+      document.getElementById('l-status'),
+      false, true);
+  }
+  tick();
+  setInterval(tick, 1000);
+
+  // Custom cursor
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    cursor.style.left = (mx - 6) + 'px';
+    cursor.style.top = (my - 6) + 'px';
+  });
+
+  function animateRing() {
+    rx += (mx - rx - 18) * 0.12;
+    ry += (my - ry - 18) * 0.12;
+    ring.style.left = rx + 'px';
+    ring.style.top = ry + 'px';
+    requestAnimationFrame(animateRing);
+  }
+  animateRing();
+
+  // Tab switching
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+    });
+  });
+
+  // Hover cursor scale
+  document.querySelectorAll('a, button, .tab, .video-card, .sub-btn').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      cursor.style.transform = 'scale(2)';
+      ring.style.width = '50px';
+      ring.style.height = '50px';
+    });
+    el.addEventListener('mouseleave', () => {
+      cursor.style.transform = 'scale(1)';
+      ring.style.width = '36px';
+      ring.style.height = '36px';
+    });
+  });
+</script>
+</body>
+</html>

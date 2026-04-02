@@ -1,33 +1,2119 @@
-
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="cs">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JARVIS - Virtual Assistant</title>
-    <link rel="shortcut icon" href="avatar.png" type="image/x-icon">
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Královna Močbaz</title>
+<link href="https://fonts.googleapis.com/css2?family=MedievalSharp&family=Cinzel:wght@400;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --swamp-dark: #0a1a0d;
+    --swamp-deep: #0d2410;
+    --swamp-green: #1a4a20;
+    --swamp-mid: #2d6b35;
+    --swamp-light: #4a9955;
+    --swamp-glow: #5dbf6a;
+    --poison: #7fff00;
+    --poison-dim: #4db800;
+    --mud: #3d2b1f;
+    --mud-light: #6b4c38;
+    --gold: #d4a843;
+    --gold-bright: #f0c84a;
+    --blood: #8b1a1a;
+    --blood-bright: #c0392b;
+    --fog: rgba(100,180,100,0.08);
+    --text-main: #c8e8c0;
+    --text-dim: #7ab87a;
+    --shadow: rgba(0,0,0,0.8);
+  }
 
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--swamp-dark);
+    color: var(--text-main);
+    font-family: 'Crimson Text', Georgia, serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Animated swamp background */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background: 
+      radial-gradient(ellipse 80% 40% at 50% 100%, rgba(20,80,30,0.4) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 30% at 20% 80%, rgba(10,60,20,0.3) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 80% 70%, rgba(15,70,25,0.25) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Floating fog particles */
+  .fog-layer {
+    position: fixed; inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    overflow: hidden;
+  }
+  .fog-particle {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(100,200,120,0.06) 0%, transparent 70%);
+    animation: fogFloat linear infinite;
+  }
+
+  @keyframes fogFloat {
+    0% { transform: translateX(-100px) translateY(10px); opacity:0; }
+    20% { opacity:1; }
+    80% { opacity:0.6; }
+    100% { transform: translateX(calc(100vw + 100px)) translateY(-20px); opacity:0; }
+  }
+
+  #app {
+    position: relative;
+    z-index: 10;
+    min-height: 100vh;
+  }
+
+  /* ===== SCREENS ===== */
+  .screen {
+    display: none;
+    min-height: 100vh;
+    padding: 20px;
+    animation: screenIn 0.6s ease;
+  }
+  .screen.active { display: flex; flex-direction: column; align-items: center; }
+
+  @keyframes screenIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ===== TITLE SCREEN ===== */
+  .title-screen {
+    justify-content: center;
+    text-align: center;
+    background: 
+      radial-gradient(ellipse 100% 60% at 50% 100%, rgba(10,40,15,0.8) 0%, transparent 70%);
+  }
+
+  .game-title {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(2.5rem, 8vw, 5rem);
+    font-weight: 900;
+    color: var(--poison);
+    text-shadow: 
+      0 0 20px rgba(127,255,0,0.5),
+      0 0 60px rgba(127,255,0,0.2),
+      2px 2px 0 rgba(0,0,0,0.8);
+    letter-spacing: 0.05em;
+    line-height: 1.1;
+    margin-bottom: 0.2em;
+    animation: titlePulse 3s ease-in-out infinite;
+  }
+
+  .game-subtitle {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(0.9rem, 2.5vw, 1.3rem);
+    color: var(--swamp-glow);
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    margin-bottom: 3rem;
+    opacity: 0.8;
+  }
+
+  @keyframes titlePulse {
+    0%,100% { text-shadow: 0 0 20px rgba(127,255,0,0.5), 0 0 60px rgba(127,255,0,0.2), 2px 2px 0 rgba(0,0,0,0.8); }
+    50% { text-shadow: 0 0 30px rgba(127,255,0,0.8), 0 0 100px rgba(127,255,0,0.4), 2px 2px 0 rgba(0,0,0,0.8); }
+  }
+
+  .queen-art {
+    font-size: 8rem;
+    margin: 1rem 0;
+    filter: drop-shadow(0 0 20px rgba(127,255,0,0.4));
+    animation: queenFloat 4s ease-in-out infinite;
+  }
+
+  @keyframes queenFloat {
+    0%,100% { transform: translateY(0) rotate(-2deg); }
+    50% { transform: translateY(-15px) rotate(2deg); }
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--swamp-green), var(--swamp-mid));
+    color: var(--poison);
+    border: 2px solid var(--swamp-glow);
+    padding: 14px 40px;
+    font-family: 'Cinzel', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+    transition: all 0.2s;
+    text-transform: uppercase;
+    margin: 8px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-primary::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, transparent, rgba(127,255,0,0.1));
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .btn-primary:hover {
+    background: linear-gradient(135deg, var(--swamp-mid), var(--swamp-light));
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.5), 0 0 20px rgba(127,255,0,0.2);
+  }
+  .btn-primary:hover::before { opacity: 1; }
+  .btn-primary:active { transform: translateY(0); }
+
+  .btn-danger {
+    background: linear-gradient(135deg, var(--blood), #c0392b);
+    border-color: #e74c3c;
+    color: #ffcccc;
+  }
+  .btn-danger:hover { background: linear-gradient(135deg, #c0392b, #e74c3c); }
+
+  .btn-gold {
+    background: linear-gradient(135deg, #7a5c10, var(--gold));
+    border-color: var(--gold-bright);
+    color: #1a0f00;
+  }
+  .btn-gold:hover { background: linear-gradient(135deg, var(--gold), var(--gold-bright)); }
+
+  /* ===== REGISTRATION / LOGIN ===== */
+  .auth-card {
+    background: linear-gradient(160deg, rgba(15,35,18,0.95), rgba(10,26,13,0.98));
+    border: 1px solid var(--swamp-mid);
+    border-top: 3px solid var(--swamp-glow);
+    padding: 40px;
+    max-width: 440px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.8), inset 0 1px 0 rgba(93,191,106,0.1);
+  }
+
+  .auth-title {
+    font-family: 'Cinzel', serif;
+    font-size: 1.8rem;
+    color: var(--swamp-glow);
+    text-align: center;
+    margin-bottom: 0.3rem;
+  }
+
+  .auth-subtitle {
+    text-align: center;
+    color: var(--text-dim);
+    font-style: italic;
+    margin-bottom: 2rem;
+    font-size: 0.95rem;
+  }
+
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  .form-label {
+    display: block;
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    font-family: 'Cinzel', serif;
+  }
+
+  .form-input {
+    width: 100%;
+    background: rgba(10,30,12,0.8);
+    border: 1px solid var(--swamp-mid);
+    border-bottom: 2px solid var(--swamp-glow);
+    color: var(--text-main);
+    padding: 12px 16px;
+    font-family: 'Crimson Text', serif;
+    font-size: 1.1rem;
+    outline: none;
+    transition: all 0.2s;
+  }
+
+  .form-input:focus {
+    border-color: var(--poison);
+    background: rgba(15,40,18,0.9);
+    box-shadow: 0 0 15px rgba(127,255,0,0.1);
+  }
+
+  .form-input::placeholder { color: rgba(122,184,122,0.4); }
+
+  .auth-tabs {
+    display: flex;
+    margin-bottom: 30px;
+    border-bottom: 1px solid var(--swamp-mid);
+  }
+
+  .auth-tab {
+    flex: 1;
+    padding: 12px;
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-family: 'Cinzel', serif;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+  }
+
+  .auth-tab.active {
+    color: var(--swamp-glow);
+    border-bottom-color: var(--swamp-glow);
+  }
+
+  .error-msg {
+    color: #e74c3c;
+    font-size: 0.9rem;
+    margin-top: 10px;
+    text-align: center;
+    min-height: 20px;
+  }
+
+  .success-msg {
+    color: var(--poison);
+    font-size: 0.9rem;
+    margin-top: 10px;
+    text-align: center;
+  }
+
+  /* ===== NAME SELECTION ===== */
+  .name-card {
+    background: linear-gradient(160deg, rgba(15,35,18,0.95), rgba(10,26,13,0.98));
+    border: 1px solid var(--swamp-mid);
+    border-top: 3px solid var(--gold);
+    padding: 40px;
+    max-width: 500px;
+    width: 100%;
+    text-align: center;
+  }
+
+  /* ===== GAME SCREEN ===== */
+  #gameScreen {
+    max-width: 900px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    background: rgba(10,26,13,0.9);
+    border: 1px solid var(--swamp-mid);
+    border-bottom: 2px solid var(--swamp-green);
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .player-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .player-name {
+    font-family: 'Cinzel', serif;
+    color: var(--gold);
+    font-size: 1rem;
+  }
+
+  .lives-display {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .life-icon {
+    font-size: 1.4rem;
+    transition: all 0.3s;
+    filter: drop-shadow(0 0 4px rgba(255,100,100,0.5));
+  }
+
+  .life-icon.lost {
+    filter: grayscale(1) opacity(0.3);
+    transform: scale(0.8);
+  }
+
+  .lives-label {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    font-family: 'Cinzel', serif;
+    letter-spacing: 0.1em;
+  }
+
+  .hp-bar-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .hp-label {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    font-family: 'Cinzel', serif;
+    white-space: nowrap;
+  }
+
+  .hp-bar {
+    width: 120px;
+    height: 12px;
+    background: rgba(0,0,0,0.5);
+    border: 1px solid var(--swamp-mid);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .hp-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--blood-bright), #e74c3c);
+    transition: width 0.5s ease;
+    box-shadow: 0 0 6px rgba(200,50,50,0.5);
+  }
+
+  /* Location display */
+  .location-banner {
+    text-align: center;
+    padding: 20px;
+    margin-bottom: 20px;
+    background: linear-gradient(135deg, rgba(10,30,15,0.8), rgba(15,45,20,0.8));
+    border: 1px solid var(--swamp-green);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .location-banner::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--swamp-glow), transparent);
+    animation: scanline 3s linear infinite;
+  }
+
+  @keyframes scanline {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+
+  .location-icon { font-size: 3.5rem; margin-bottom: 8px; display: block; }
+
+  .location-name {
+    font-family: 'Cinzel', serif;
+    font-size: 1.6rem;
+    color: var(--poison);
+    text-shadow: 0 0 15px rgba(127,255,0,0.4);
+  }
+
+  .location-desc {
+    color: var(--text-dim);
+    font-style: italic;
+    margin-top: 6px;
+    font-size: 1rem;
+  }
+
+  /* Story box */
+  .story-box {
+    background: rgba(5,18,8,0.9);
+    border: 1px solid var(--swamp-green);
+    border-left: 4px solid var(--swamp-glow);
+    padding: 20px 24px;
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: var(--text-main);
+    min-height: 80px;
+  }
+
+  .story-text { animation: textReveal 0.5s ease; }
+
+  @keyframes textReveal {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* Actions */
+  .actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .action-btn {
+    background: linear-gradient(135deg, rgba(15,45,20,0.8), rgba(20,60,25,0.8));
+    border: 1px solid var(--swamp-mid);
+    color: var(--text-main);
+    padding: 14px 18px;
+    font-family: 'Crimson Text', serif;
+    font-size: 1rem;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .action-btn:hover {
+    background: linear-gradient(135deg, rgba(25,70,30,0.9), rgba(35,90,40,0.9));
+    border-color: var(--swamp-glow);
+    transform: translateX(4px);
+    box-shadow: -4px 0 15px rgba(93,191,106,0.2);
+  }
+
+  .action-icon { font-size: 1.4rem; }
+
+  /* Combat screen */
+  .combat-arena {
+    background: linear-gradient(160deg, rgba(30,5,5,0.9), rgba(15,5,5,0.95));
+    border: 2px solid var(--blood);
+    padding: 24px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .combat-arena::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 20px,
+      rgba(139,26,26,0.03) 20px,
+      rgba(139,26,26,0.03) 40px
+    );
+    pointer-events: none;
+  }
+
+  .enemy-section {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .enemy-art { font-size: 6rem; animation: enemyFloat 3s ease-in-out infinite; display: inline-block; }
+  @keyframes enemyFloat {
+    0%,100% { transform: translateY(0) scale(1); filter: drop-shadow(0 0 10px rgba(127,255,0,0.3)); }
+    50% { transform: translateY(-10px) scale(1.05); filter: drop-shadow(0 0 25px rgba(127,255,0,0.6)); }
+  }
+
+  .enemy-name {
+    font-family: 'Cinzel', serif;
+    font-size: 1.4rem;
+    color: #e74c3c;
+    text-shadow: 0 0 15px rgba(200,50,50,0.5);
+    margin: 8px 0 4px;
+  }
+
+  .enemy-hp-bar {
+    width: 100%;
+    height: 16px;
+    background: rgba(0,0,0,0.5);
+    border: 1px solid var(--blood);
+    margin: 10px auto;
+    max-width: 300px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .enemy-hp-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--blood), var(--blood-bright));
+    transition: width 0.5s ease;
+  }
+
+  .combat-log {
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(139,26,26,0.4);
+    padding: 12px 16px;
+    font-style: italic;
+    color: #ffaaaa;
+    margin: 15px 0;
+    font-size: 0.95rem;
+    min-height: 50px;
+    animation: textReveal 0.3s ease;
+  }
+
+  .combat-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  /* Map */
+  .map-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .map-tile {
+    background: rgba(10,30,15,0.8);
+    border: 1px solid var(--swamp-mid);
+    padding: 16px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+  }
+
+  .map-tile:hover:not(.locked) {
+    background: rgba(20,55,25,0.9);
+    border-color: var(--swamp-glow);
+    transform: translateY(-3px);
+  }
+
+  .map-tile.current {
+    border-color: var(--gold);
+    background: rgba(25,60,20,0.9);
+    color: var(--gold);
+  }
+
+  .map-tile.locked {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .map-tile.boss-tile {
+    border-color: var(--blood);
+    background: rgba(30,5,5,0.8);
+    color: #e74c3c;
+  }
+
+  .map-tile.boss-tile:hover {
+    background: rgba(50,10,10,0.9);
+    border-color: var(--blood-bright);
+  }
+
+  .map-icon { font-size: 2rem; display: block; margin-bottom: 6px; }
+
+  /* Modal */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.active { display: flex; }
+
+  .modal-box {
+    background: linear-gradient(160deg, rgba(15,35,18,0.98), rgba(10,26,13,0.99));
+    border: 2px solid var(--swamp-glow);
+    padding: 40px;
+    max-width: 480px;
+    width: 100%;
+    text-align: center;
+    animation: modalIn 0.4s ease;
+  }
+
+  .modal-box.danger { border-color: var(--blood); }
+  .modal-box.victory { border-color: var(--gold); }
+
+  @keyframes modalIn {
+    from { opacity:0; transform: scale(0.8); }
+    to { opacity:1; transform: scale(1); }
+  }
+
+  .modal-title {
+    font-family: 'Cinzel', serif;
+    font-size: 2rem;
+    margin-bottom: 15px;
+  }
+  .modal-title.green { color: var(--poison); text-shadow: 0 0 20px rgba(127,255,0,0.5); }
+  .modal-title.red { color: #e74c3c; text-shadow: 0 0 20px rgba(200,50,50,0.5); }
+  .modal-title.gold { color: var(--gold-bright); text-shadow: 0 0 20px rgba(212,168,67,0.5); }
+
+  .modal-text {
+    color: var(--text-dim);
+    margin-bottom: 25px;
+    line-height: 1.7;
+    font-size: 1.05rem;
+  }
+
+  /* Section headers */
+  .section-title {
+    font-family: 'Cinzel', serif;
+    color: var(--swamp-glow);
+    font-size: 1.1rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin: 20px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--swamp-green);
+  }
+
+  /* Scrollable users list */
+  .users-list {
+    max-height: 200px;
+    overflow-y: auto;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid var(--swamp-mid);
+    padding: 8px;
+    margin-bottom: 16px;
+  }
+
+  .user-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 12px;
+    border-bottom: 1px solid rgba(45,107,53,0.3);
+    font-size: 0.95rem;
+    color: var(--text-dim);
+  }
+
+  .user-item:last-child { border-bottom: none; }
+  .user-rank { color: var(--gold); font-family: 'Cinzel', serif; font-size: 0.8rem; }
+
+  /* Status effects */
+  .status-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+  }
+
+  .status-badge {
+    background: rgba(127,255,0,0.15);
+    border: 1px solid var(--poison-dim);
+    color: var(--poison);
+    padding: 4px 10px;
+    font-size: 0.78rem;
+    font-family: 'Cinzel', serif;
+    letter-spacing: 0.05em;
+  }
+
+  .status-badge.debuff {
+    background: rgba(200,50,50,0.15);
+    border-color: var(--blood-bright);
+    color: #ff9999;
+  }
+
+  /* Tabs for main game */
+  .game-tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid var(--swamp-green);
+  }
+
+  .game-tab {
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: var(--text-dim);
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    padding: 10px 18px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: -2px;
+    letter-spacing: 0.05em;
+  }
+
+  .game-tab:hover { color: var(--text-main); }
+  .game-tab.active { color: var(--swamp-glow); border-bottom-color: var(--swamp-glow); }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* Chest / reward */
+  .reward-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: rgba(20,60,20,0.3);
+    border: 1px solid var(--swamp-mid);
+    margin-bottom: 8px;
+  }
+
+  .reward-icon { font-size: 1.8rem; }
+  .reward-name { font-family: 'Cinzel', serif; font-size: 0.95rem; color: var(--gold); }
+  .reward-desc { font-size: 0.85rem; color: var(--text-dim); }
+
+  /* Inventory */
+  .inventory-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 10px;
+  }
+
+  .inv-item {
+    background: rgba(10,30,15,0.7);
+    border: 1px solid var(--swamp-mid);
+    padding: 14px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .inv-item:hover {
+    border-color: var(--gold);
+    background: rgba(20,50,20,0.9);
+  }
+
+  .inv-icon { font-size: 2rem; display: block; margin-bottom: 6px; }
+  .inv-name { font-size: 0.8rem; font-family: 'Cinzel', serif; color: var(--text-dim); }
+  .inv-name.equipped { color: var(--gold); }
+
+  /* Progress bar for boss */
+  .boss-progress {
+    margin: 15px 0;
+    padding: 12px;
+    background: rgba(30,5,5,0.5);
+    border: 1px solid var(--blood);
+    text-align: center;
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    color: #e74c3c;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: rgba(10,26,13,0.5); }
+  ::-webkit-scrollbar-thumb { background: var(--swamp-mid); border-radius: 3px; }
+
+  /* Separator */
+  .sep {
+    border: none;
+    border-top: 1px solid var(--swamp-green);
+    margin: 20px 0;
+    opacity: 0.5;
+  }
+
+  /* ===== ADMIN PANEL ===== */
+  .admin-panel {
+    background: linear-gradient(160deg, rgba(30,20,5,0.98), rgba(20,12,2,0.99));
+    border: 2px solid var(--gold);
+    padding: 30px;
+    max-width: 560px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+
+  .admin-title {
+    font-family: 'Cinzel', serif;
+    font-size: 1.6rem;
+    color: var(--gold-bright);
+    text-shadow: 0 0 20px rgba(240,200,74,0.5);
+    text-align: center;
+    margin-bottom: 6px;
+  }
+
+  .admin-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #7a5c10, var(--gold));
+    color: #1a0f00;
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    padding: 3px 10px;
+    margin-bottom: 20px;
+    clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+  }
+
+  .admin-user-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: rgba(10,8,2,0.5);
+    border: 1px solid rgba(212,168,67,0.25);
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+
+  .admin-user-name {
+    font-family: 'Cinzel', serif;
+    color: var(--gold);
+    font-size: 0.95rem;
+    flex: 1;
+    min-width: 100px;
+  }
+
+  .admin-user-stats {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    flex: 2;
+  }
+
+  .admin-input {
+    width: 80px;
+    background: rgba(10,8,2,0.8);
+    border: 1px solid var(--gold);
+    color: var(--gold-bright);
+    padding: 6px 8px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    text-align: center;
+    outline: none;
+  }
+
+  .btn-admin {
+    background: linear-gradient(135deg, #5c4010, var(--gold));
+    border: 1px solid var(--gold-bright);
+    color: #1a0f00;
+    padding: 6px 12px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    cursor: pointer;
+    font-weight: 700;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .btn-admin:hover { background: linear-gradient(135deg, var(--gold), var(--gold-bright)); }
+
+  .btn-admin-red {
+    background: linear-gradient(135deg, var(--blood), var(--blood-bright));
+    border-color: #e74c3c;
+    color: #fff;
+  }
+  .btn-admin-red:hover { background: linear-gradient(135deg, var(--blood-bright), #e74c3c); }
+
+  .btn-admin-green {
+    background: linear-gradient(135deg, var(--swamp-green), var(--swamp-mid));
+    border-color: var(--swamp-glow);
+    color: var(--poison);
+  }
+  .btn-admin-green:hover { background: linear-gradient(135deg, var(--swamp-mid), var(--swamp-light)); }
+
+  .admin-section-title {
+    font-family: 'Cinzel', serif;
+    color: var(--gold);
+    font-size: 0.85rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin: 18px 0 10px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid rgba(212,168,67,0.3);
+  }
+
+  .admin-log {
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(212,168,67,0.2);
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    color: var(--poison);
+    margin-top: 12px;
+    min-height: 30px;
+    font-style: italic;
+  }
+
+  /* ===== ANNOUNCE BANNER ===== */
+  .announce-banner {
+    display: none;
+    background: linear-gradient(135deg, rgba(212,168,67,0.15), rgba(240,200,74,0.1));
+    border: 1px solid var(--gold);
+    border-left: 4px solid var(--gold-bright);
+    padding: 12px 18px;
+    margin-bottom: 16px;
+    font-size: 1rem;
+    color: var(--gold-bright);
+    animation: screenIn 0.5s ease;
+    cursor: pointer;
+    position: relative;
+  }
+  .announce-banner .announce-close {
+    position: absolute; top: 8px; right: 12px;
+    font-size: 0.8rem; color: var(--text-dim); cursor: pointer;
+  }
+  .announce-banner.visible { display: block; }
+
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20%,60% { transform: translateX(-8px); }
+    40%,80% { transform: translateX(8px); }
+  }
+
+  .shake { animation: shake 0.4s ease; }
+
+  @keyframes flash-red {
+    0%,100% { background: inherit; }
+    50% { background: rgba(200,50,50,0.3); }
+  }
+
+  @keyframes flash-green {
+    0%,100% { background: inherit; }
+    50% { background: rgba(50,200,80,0.2); }
+  }
+</style>
 </head>
-
 <body>
-    <section class="main">
-        <div class="image-container">
-            <div class="image">
-                <img src="giphy.gif" alt="image">
-            </div>
-            <h1>J A R V I S</h1>
-            <p>I'm a Virtual Assistant JARVIS, How may i help you?</p>
-        </div>
-        <div class="input">
-            <button class="talk"><i class="fas fa-microphone-alt"></i></button>
-            <h1 class="content"> Click here to speak</h1>
-        </div>
-    </section>
-    <script src="app.js"></script>
-</body>
 
+<div class="fog-layer" id="fogLayer"></div>
+
+<div id="app">
+
+  <!-- ===== TITLE SCREEN ===== -->
+  <div class="screen active title-screen" id="titleScreen">
+    <div class="queen-art">🧙‍♀️</div>
+    <h1 class="game-title">Královna<br>Močbaz</h1>
+    <p class="game-subtitle">Dobrodružství v bahnitých říších</p>
+    <div style="display:flex; flex-direction:column; align-items:center; gap:10px;">
+      <button class="btn-primary" onclick="showScreen('authScreen')">⚔️ Vstoupit do hry</button>
+    </div>
+    <p style="margin-top:3rem; color:var(--text-dim); font-style:italic; font-size:0.9rem;">
+      Musíš se přihlásit, abys mohl hrát
+    </p>
+  </div>
+
+  <!-- ===== AUTH SCREEN ===== -->
+  <div class="screen" id="authScreen" style="justify-content:center; padding-top:40px;">
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="switchTab('login')">Přihlášení</button>
+        <button class="auth-tab" onclick="switchTab('register')">Registrace</button>
+      </div>
+
+      <div id="loginForm">
+        <h2 class="auth-title">🌿 Vstup do bažin</h2>
+        <p class="auth-subtitle">Přihlaste se ke svému účtu</p>
+        <div class="form-group">
+          <label class="form-label">Uživatelské jméno</label>
+          <input type="text" class="form-input" id="loginUser" placeholder="Tvoje jméno...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Heslo</label>
+          <input type="password" class="form-input" id="loginPass" placeholder="••••••••">
+        </div>
+        <div id="loginError" class="error-msg"></div>
+        <button class="btn-primary" style="width:100%" onclick="login()">Vstoupit ⚔️</button>
+      </div>
+
+      <div id="registerForm" style="display:none">
+        <h2 class="auth-title">🌱 Nový dobrodruh</h2>
+        <p class="auth-subtitle">Vytvoř si svůj účet</p>
+        <div class="form-group">
+          <label class="form-label">Uživatelské jméno</label>
+          <input type="text" class="form-input" id="regUser" placeholder="Vymysli si jméno...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Heslo</label>
+          <input type="password" class="form-input" id="regPass" placeholder="Alespoň 4 znaky...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Heslo znovu</label>
+          <input type="password" class="form-input" id="regPass2" placeholder="Zopakuj heslo...">
+        </div>
+        <div id="regError" class="error-msg"></div>
+        <div id="regSuccess" class="success-msg"></div>
+        <button class="btn-primary" style="width:100%" onclick="register()">Zaregistrovat se 🌿</button>
+      </div>
+
+      <hr class="sep">
+      <button class="btn-primary" style="width:100%; opacity:0.6" onclick="showScreen('titleScreen')">← Zpět</button>
+    </div>
+  </div>
+
+  <!-- ===== NAME SELECTION ===== -->
+  <div class="screen" id="nameScreen" style="justify-content:center;">
+    <div class="name-card">
+      <div style="font-size:4rem; margin-bottom:16px;">🏷️</div>
+      <h2 style="font-family:'Cinzel',serif; color:var(--gold-bright); font-size:1.8rem; margin-bottom:8px;">Jméno hrdiny</h2>
+      <p style="color:var(--text-dim); font-style:italic; margin-bottom:24px;">Jak chceš být znám v říši bažin?</p>
+      <div class="form-group">
+        <input type="text" class="form-input" id="heroNameInput" placeholder="Zadej jméno svého hrdiny..." maxlength="20" style="text-align:center; font-size:1.3rem;">
+      </div>
+      <p style="color:var(--text-dim); font-size:0.85rem; margin-bottom:20px;">Toto jméno bude viditelné v síni slávy</p>
+      <button class="btn-primary btn-gold" onclick="confirmHeroName()">Vstoupit do bažin ⚔️</button>
+    </div>
+  </div>
+
+  <!-- ===== MAIN GAME SCREEN ===== -->
+  <div class="screen" id="gameScreen">
+    <div style="width:100%">
+      <div class="game-header">
+        <div class="player-info">
+          <span class="player-name" id="displayName">Hrdina</span>
+          <div class="lives-display">
+            <span class="lives-label">ŽIVOTY:</span>
+            <span class="life-icon" id="life1">❤️</span>
+            <span class="life-icon" id="life2">❤️</span>
+            <span class="life-icon" id="life3">❤️</span>
+          </div>
+        </div>
+        <div class="hp-bar-container">
+          <span class="hp-label">HP:</span>
+          <div class="hp-bar"><div class="hp-fill" id="hpFill" style="width:100%"></div></div>
+          <span id="hpText" style="font-size:0.85rem; color:var(--text-dim);">100/100</span>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn-primary btn-gold" id="adminBtn" style="padding:8px 16px; font-size:0.8rem; display:none;" onclick="showAdminPanel()">👑 Admin</button>
+          <button class="btn-primary" style="padding:8px 16px; font-size:0.8rem;" onclick="showLogout()">Odhlásit</button>
+        </div>
+      </div>
+
+      <div id="announceBanner" class="announce-banner">
+        <span class="announce-close" onclick="dismissAnnounce()">✕ zavřít</span>
+        <strong>📢 Správce bažin:</strong> <span id="announceBannerText"></span>
+      </div>
+
+      <div class="game-tabs">
+        <button class="game-tab active" onclick="switchGameTab('explore')">🗺️ Výprava</button>
+        <button class="game-tab" onclick="switchGameTab('inventory')">🎒 Inventář</button>
+        <button class="game-tab" onclick="switchGameTab('progress')">📜 Postup</button>
+        <button class="game-tab" onclick="switchGameTab('hall')">🏆 Síň slávy</button>
+      </div>
+
+      <!-- EXPLORE TAB -->
+      <div class="tab-content active" id="tab-explore">
+        <div class="location-banner">
+          <span class="location-icon" id="locIcon">🌿</span>
+          <div class="location-name" id="locName">Temné bažiny</div>
+          <div class="location-desc" id="locDesc">Vstupní oblast plná mlhy a nebezpečí</div>
+        </div>
+
+        <div class="story-box">
+          <div class="story-text" id="storyText">Vítej, hrdino. Temné bažiny tě vítají s vlhkým objetím mlhy. Někde daleko ve středu Močbaz trůní Královna Močbaz, jejíž kletba zahaluje celou říši. Tvým úkolem je projít různými oblastmi a porazit ji.</div>
+        </div>
+
+        <div id="statusBar" class="status-bar"></div>
+
+        <div class="actions-grid" id="actionButtons"></div>
+      </div>
+
+      <!-- INVENTORY TAB -->
+      <div class="tab-content" id="tab-inventory">
+        <p class="section-title">⚔️ Vybavení</p>
+        <div class="inventory-grid" id="inventoryGrid"></div>
+        <hr class="sep">
+        <p class="section-title">🧪 Lektvary</p>
+        <div class="inventory-grid" id="potionsGrid"></div>
+        <p style="color:var(--text-dim); font-style:italic; font-size:0.9rem; margin-top:10px;" id="invNote"></p>
+        <hr class="sep">
+        <p class="section-title">⚙️ Nastavení postavy</p>
+        <div id="renameSection"></div>
+      </div>
+
+      <!-- PROGRESS TAB -->
+      <div class="tab-content" id="tab-progress">
+        <p class="section-title">📍 Mapa světa</p>
+        <div class="map-grid" id="worldMap"></div>
+        <div class="boss-progress" id="bossProgress"></div>
+      </div>
+
+      <!-- HALL OF FAME TAB -->
+      <div class="tab-content" id="tab-hall">
+        <p class="section-title">🏆 Síň slávy</p>
+        <div class="users-list" id="hallList" style="max-height:400px;"></div>
+        <p style="color:var(--text-dim); font-style:italic; font-size:0.85rem; margin-top:12px; text-align:center;">Seřazeno podle počtu porážek Královny Močbaz</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== MODALS ===== -->
+<div class="modal-overlay" id="combatModal">
+  <div class="modal-box danger">
+    <div class="combat-arena">
+      <div class="enemy-section">
+        <span class="enemy-art" id="enemyArt">👾</span>
+        <div class="enemy-name" id="enemyName">Nepřítel</div>
+        <div class="enemy-hp-bar"><div class="enemy-hp-fill" id="enemyHpFill" style="width:100%"></div></div>
+        <span id="enemyHpText" style="font-size:0.85rem; color:#ff9999;"></span>
+      </div>
+      <div class="combat-log" id="combatLog">Boj začíná...</div>
+      <div class="combat-actions">
+        <button class="btn-primary" onclick="combatAction('attack')">⚔️ Útok</button>
+        <button class="btn-primary" onclick="combatAction('magic')">🔮 Magie</button>
+        <button class="btn-primary" onclick="combatAction('potion')" id="combatPotionBtn">🧪 Lektvar</button>
+        <button class="btn-primary btn-danger" onclick="combatAction('flee')">💨 Útěk</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="resultModal">
+  <div class="modal-box" id="resultBox">
+    <div class="modal-title" id="resultTitle">Výsledek</div>
+    <div style="font-size:4rem; margin:15px 0;" id="resultIcon">🎉</div>
+    <div class="modal-text" id="resultText"></div>
+    <button class="btn-primary" id="resultBtn" onclick="closeResult()">Pokračovat</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="adminModal">
+  <div class="admin-panel">
+    <div style="text-align:center; margin-bottom:4px;">
+      <div class="admin-title">👑 Admin Panel</div>
+      <span class="admin-badge">✦ SPRÁVCE HRY ✦</span>
+    </div>
+
+    <!-- SEARCH PLAYER -->
+    <div class="admin-section-title">🔍 Najít hráče</div>
+    <div style="display:flex; gap:8px; margin-bottom:8px; flex-wrap:wrap; align-items:center;">
+      <input type="text" class="admin-input" id="adminSearchInput" placeholder="Jméno hrdiny..." style="width:160px; font-size:0.9rem;">
+      <button class="btn-admin" onclick="adminSearchPlayer()">🔍 Hledat</button>
+      <button class="btn-admin btn-admin-green" onclick="adminToggleAllPlayers()">👥 Ukázat všechny</button>
+    </div>
+    <div id="adminPlayerList"></div>
+
+    <!-- GLOBAL ANNOUNCE -->
+    <div class="admin-section-title">📢 Globální oznámení</div>
+    <div style="margin-bottom:8px;">
+      <textarea id="announceInput" style="width:100%; background:rgba(10,8,2,0.8); border:1px solid var(--gold); color:var(--gold-bright); padding:10px; font-family:'Crimson Text',serif; font-size:1rem; resize:vertical; min-height:60px; outline:none;" placeholder="Napiš zprávu pro všechny hráče..."></textarea>
+    </div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <button class="btn-admin btn-admin-green" onclick="adminSendAnnounce()">📢 Odeslat zprávu</button>
+      <button class="btn-admin btn-admin-red" onclick="adminClearAnnounce()">🗑 Smazat oznámení</button>
+    </div>
+    <div id="currentAnnounce" style="margin-top:8px; font-size:0.82rem; color:var(--text-dim); font-style:italic;"></div>
+
+    <!-- GLOBAL ACTIONS -->
+    <div class="admin-section-title">⚙️ Globální akce</div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <button class="btn-admin btn-admin-green" onclick="adminUnlockAllForAll()">🗺️ Odemknout vše všem</button>
+      <button class="btn-admin btn-admin-red" onclick="adminResetAllConfirm()">💀 Reset všech hráčů</button>
+    </div>
+
+    <div class="admin-log" id="adminLog">Vítej, správče bažin.</div>
+
+    <hr style="border-color:rgba(212,168,67,0.2); margin:20px 0;">
+    <button class="btn-primary" style="width:100%; padding:10px;" onclick="document.getElementById('adminModal').classList.remove('active')">Zavřít panel</button>
+  </div>
+</div>
+
+
+<div class="modal-overlay" id="renameModal">
+  <div class="modal-box">
+    <div class="modal-title green">✏️ Změnit jméno hrdiny</div>
+    <div class="modal-text" id="renameInfo">Můžeš si změnit jméno hrdiny <strong style="color:var(--gold)">pouze jednou</strong>. Po potvrzení to nelze vrátit zpět.</div>
+    <div class="form-group" style="margin:16px 0;">
+      <label class="form-label">Nové jméno hrdiny</label>
+      <input type="text" class="form-input" id="renameInput" placeholder="Nové jméno..." maxlength="20" style="text-align:center; font-size:1.2rem;">
+    </div>
+    <div id="renameError" class="error-msg"></div>
+    <button class="btn-primary btn-gold" onclick="confirmRename()">✏️ Potvrdit změnu</button>
+    <button class="btn-primary" onclick="document.getElementById('renameModal').classList.remove('active')" style="margin-top:4px;">Zrušit</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="announceViewModal">
+  <div class="modal-box">
+    <div style="font-size:3rem; margin-bottom:10px;">📢</div>
+    <div class="modal-title gold" style="color:var(--gold-bright);">Zpráva od správce</div>
+    <div class="modal-text" id="announceViewText" style="font-size:1.1rem; line-height:1.8; color:var(--text-main);"></div>
+    <button class="btn-primary btn-gold" onclick="dismissAnnounce()">Rozumím 👍</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="logoutModal">
+  <div class="modal-box">
+    <div class="modal-title" style="color:var(--text-dim);">Odhlásit se?</div>
+    <div class="modal-text">Tvůj postup bude uložen. Vrátíš se na titulní obrazovku.</div>
+    <button class="btn-primary btn-danger" onclick="logout()">Odhlásit ⬅</button>
+    <button class="btn-primary" onclick="document.getElementById('logoutModal').classList.remove('active')">Zrušit</button>
+  </div>
+</div>
+
+<script>
+// ==================== ADMIN ACCOUNTS ====================
+const ADMIN_ACCOUNTS = ['Tomik', 'TomasekPlays', 'tomik', 'tomasekplays'];
+function isAdmin(username) { return ADMIN_ACCOUNTS.includes(username); }
+
+// ==================== DATA ====================
+
+const LOCATIONS = [
+  { id:'swamp',  name:'Temné bažiny',     icon:'🌿', desc:'Vstupní oblast plná mlhy a nebezpečí',          enemies:['Bahenní netvor','Jedovatá žába','Blátivý golem'], bossRequired:0 },
+  { id:'forest', name:'Prokletý les',      icon:'🌲', desc:'Husté stromy skrývají temná stvoření',           enemies:['Lesní duch','Vlk stínů','Stromový démon'],    bossRequired:1 },
+  { id:'cave',   name:'Jeskyně hrůzy',     icon:'⛰️', desc:'Temná jeskyně plná kostí a tmy',               enemies:['Jeskyňní troll','Netopýří kníže','Kamenný golem'], bossRequired:2 },
+  { id:'island', name:'Ostrov zapomnění',  icon:'🏝️', desc:'Tajemný ostrov uprostřed bažin',               enemies:['Mořský drak','Duch ostrova','Stínový rytíř'],  bossRequired:3 },
+  { id:'ruins',  name:'Zříceniny prokletí',icon:'🏚️', desc:'Zbytky staré pevnosti zla',                    enemies:['Přízrak vojáka','Kletebný mág','Rytíř tmy'],   bossRequired:4 },
+  { id:'palace', name:'Palác Močbaz',      icon:'🏰', desc:'Sídlo samotné Královny Močbaz',                 enemies:['Strážce trůnu','Temný rytíř'], isBoss:true,    bossRequired:5 },
+];
+
+const ENEMIES_DATA = {
+  'Bahenní netvor':   { icon:'🐸', hp:40,  dmg:[8,15],  reward:{gold:15, xp:20, chance:0.3} },
+  'Jedovatá žába':    { icon:'🐊', hp:30,  dmg:[6,12],  reward:{gold:10, xp:15, chance:0.4} },
+  'Blátivý golem':    { icon:'🪨', hp:55,  dmg:[12,20], reward:{gold:20, xp:30, chance:0.25} },
+  'Lesní duch':       { icon:'👻', hp:50,  dmg:[10,18], reward:{gold:18, xp:25, chance:0.35} },
+  'Vlk stínů':        { icon:'🐺', hp:60,  dmg:[14,22], reward:{gold:22, xp:35, chance:0.3} },
+  'Stromový démon':   { icon:'🌳', hp:70,  dmg:[16,25], reward:{gold:28, xp:45, chance:0.2} },
+  'Jeskyňní troll':   { icon:'👹', hp:75,  dmg:[18,28], reward:{gold:30, xp:50, chance:0.3} },
+  'Netopýří kníže':   { icon:'🦇', hp:65,  dmg:[15,24], reward:{gold:25, xp:40, chance:0.35} },
+  'Kamenný golem':    { icon:'⚙️', hp:90,  dmg:[20,30], reward:{gold:35, xp:60, chance:0.2} },
+  'Mořský drak':      { icon:'🐉', hp:100, dmg:[22,35], reward:{gold:45, xp:75, chance:0.25} },
+  'Duch ostrova':     { icon:'🌊', hp:80,  dmg:[18,28], reward:{gold:35, xp:60, chance:0.3} },
+  'Stínový rytíř':    { icon:'⚔️', hp:95,  dmg:[25,38], reward:{gold:50, xp:80, chance:0.2} },
+  'Přízrak vojáka':   { icon:'💀', hp:85,  dmg:[22,32], reward:{gold:40, xp:70, chance:0.25} },
+  'Kletebný mág':     { icon:'🔮', hp:90,  dmg:[20,35], reward:{gold:45, xp:80, chance:0.3} },
+  'Rytíř tmy':        { icon:'🛡️', hp:110, dmg:[28,40], reward:{gold:55, xp:90, chance:0.2} },
+  'Strážce trůnu':    { icon:'👑', hp:120, dmg:[30,45], reward:{gold:60, xp:100, chance:0.15} },
+  'Temný rytíř':      { icon:'⚔️', hp:130, dmg:[32,48], reward:{gold:70, xp:110, chance:0.15} },
+  'Královna Močbaz':  { icon:'🧙‍♀️', hp:200, dmg:[35,55], reward:{gold:200, xp:500, chance:1}, isBoss:true },
+};
+
+const ITEMS = [
+  { id:'sword',    name:'Rezavý meč',     icon:'⚔️',  type:'weapon', bonus:5,  desc:'Základní zbraň (+5 útok)' },
+  { id:'axe',      name:'Bahenní sekera', icon:'🪓',  type:'weapon', bonus:12, desc:'Pevná sekera (+12 útok)' },
+  { id:'staff',    name:'Kouzelnická hůl',icon:'🔮',  type:'weapon', bonus:15, desc:'Magická hůl (+15 útok)' },
+  { id:'shield',   name:'Prohnilý štít',  icon:'🛡️',  type:'armor',  bonus:8,  desc:'Chrání před zásahy (+8 obrana)' },
+  { id:'armor',    name:'Bahenní brnění', icon:'🦺',  type:'armor',  bonus:15, desc:'Pevné brnění (+15 obrana)' },
+  { id:'amulet',   name:'Amulet bažiny',  icon:'📿',  type:'amulet', bonus:10, desc:'Magický amulet (+10 HP max)' },
+];
+
+const POTIONS = [
+  { id:'hpSmall',  name:'Malý lektvar HP',   icon:'🧪', heal:30,  buy:20 },
+  { id:'hpBig',    name:'Velký lektvar HP',   icon:'⚗️', heal:60,  buy:40 },
+  { id:'antidote', name:'Protijed',           icon:'💉', effect:'clearPoison', buy:25 },
+];
+
+// ==================== STATE ====================
+let state = {
+  users: JSON.parse(localStorage.getItem('mocbaz_users') || '{}'),
+  currentUser: null,
+};
+
+function getPlayerData(username) {
+  if (!state.users[username]) return null;
+  return state.users[username].playerData || null;
+}
+
+function savePlayerData(data) {
+  state.users[state.currentUser].playerData = data;
+  localStorage.setItem('mocbaz_users', JSON.stringify(state.users));
+}
+
+function defaultPlayerData(heroName) {
+  return {
+    heroName,
+    nameChanged: false,
+    hp: 100, maxHp: 100,
+    attack: 15, defense: 5,
+    gold: 50, xp: 0, level: 1,
+    lives: 3,
+    inventory: ['sword'],
+    equipped: { weapon: 'sword', armor: null, amulet: null },
+    potions: ['hpSmall', 'hpSmall'],
+    defeatedBosses: 0,
+    defeatedEnemies: 0,
+    currentLocation: 'swamp',
+    visitedLocations: ['swamp'],
+    statusEffects: [],
+    wins: 0,
+  };
+}
+
+let player = null;
+let combat = null;
+
+// ==================== UI UTILS ====================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
+  document.getElementById('registerForm').style.display = tab === 'register' ? 'block' : 'none';
+}
+
+function switchGameTab(tab) {
+  document.querySelectorAll('.game-tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  if (tab === 'inventory') renderInventory();
+  if (tab === 'progress') renderProgress();
+  if (tab === 'hall') renderHallOfFame();
+}
+
+// ==================== AUTH ====================
+function register() {
+  const u = document.getElementById('regUser').value.trim();
+  const p = document.getElementById('regPass').value;
+  const p2 = document.getElementById('regPass2').value;
+  const err = document.getElementById('regError');
+  const suc = document.getElementById('regSuccess');
+  err.textContent = ''; suc.textContent = '';
+  if (!u || u.length < 3) { err.textContent = 'Jméno musí mít alespoň 3 znaky.'; return; }
+  if (!p || p.length < 4) { err.textContent = 'Heslo musí mít alespoň 4 znaky.'; return; }
+  if (p !== p2) { err.textContent = 'Hesla se neshodují.'; return; }
+  if (state.users[u]) { err.textContent = 'Toto jméno je již obsazeno.'; return; }
+  state.users[u] = { password: btoa(p), playerData: null };
+  localStorage.setItem('mocbaz_users', JSON.stringify(state.users));
+  suc.textContent = '✅ Registrace úspěšná! Nyní se přihlaste.';
+}
+
+function login() {
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
+  const err = document.getElementById('loginError');
+  err.textContent = '';
+  if (!state.users[u]) { err.textContent = 'Uživatel neexistuje.'; return; }
+  if (state.users[u].password !== btoa(p)) { err.textContent = 'Špatné heslo.'; return; }
+  state.currentUser = u;
+  player = getPlayerData(u);
+  if (!player) {
+    showScreen('nameScreen');
+  } else {
+    startGame();
+  }
+}
+
+function confirmHeroName() {
+  const n = document.getElementById('heroNameInput').value.trim();
+  if (!n || n.length < 2) { alert('Zadej jméno (alespoň 2 znaky)!'); return; }
+  player = defaultPlayerData(n);
+  savePlayerData(player);
+  startGame();
+}
+
+function logout() {
+  savePlayerData(player);
+  state.currentUser = null;
+  player = null;
+  document.getElementById('logoutModal').classList.remove('active');
+  showScreen('titleScreen');
+}
+
+function showLogout() { document.getElementById('logoutModal').classList.add('active'); }
+
+// ==================== GAME ====================
+function startGame() {
+  document.getElementById('displayName').textContent = `⚔️ ${player.heroName}`;
+  const adminBtn = document.getElementById('adminBtn');
+  if (isAdmin(state.currentUser)) {
+    adminBtn.style.display = 'inline-block';
+    document.getElementById('displayName').textContent = `👑 ${player.heroName} [ADMIN]`;
+  } else {
+    adminBtn.style.display = 'none';
+  }
+  updateHpBar();
+  updateLives();
+  renderLocation();
+  checkAnnouncement();
+  showScreen('gameScreen');
+}
+
+function renderLocation() {
+  const loc = LOCATIONS.find(l => l.id === player.currentLocation);
+  document.getElementById('locIcon').textContent = loc.icon;
+  document.getElementById('locName').textContent = loc.name;
+  document.getElementById('locDesc').textContent = loc.desc;
+  renderActions();
+  renderStatusEffects();
+}
+
+function setStory(text) {
+  const el = document.getElementById('storyText');
+  el.textContent = text;
+  el.classList.remove('story-text');
+  void el.offsetWidth;
+  el.classList.add('story-text');
+}
+
+function renderActions() {
+  const loc = LOCATIONS.find(l => l.id === player.currentLocation);
+  const buttons = [];
+
+  if (loc.isBoss) {
+    if (player.defeatedBosses >= loc.bossRequired) {
+      buttons.push({ icon:'🔮', text:'Vyzvat Královnu Močbaz', fn:'startBossFight()' });
+    }
+    buttons.push({ icon:'🚶', text:'Odejít zpět', fn:'goBack()' });
+  } else {
+    buttons.push({ icon:'⚔️', text:'Hledat nepřítele', fn:'searchEnemy()' });
+    buttons.push({ icon:'🔍', text:'Prozkoumat okolí', fn:'explore()' });
+    buttons.push({ icon:'🛒', text:'Obchodník', fn:'openShop()' });
+    if (player.currentLocation !== 'swamp') {
+      buttons.push({ icon:'🚶', text:'Vrátit se zpět', fn:'goBack()' });
+    }
+    // Travel buttons
+    LOCATIONS.forEach(nextLoc => {
+      if (nextLoc.id !== player.currentLocation && player.defeatedBosses >= nextLoc.bossRequired) {
+        buttons.push({ icon:nextLoc.icon, text:`Cestovat: ${nextLoc.name}`, fn:`travelTo('${nextLoc.id}')` });
+      }
+    });
+  }
+
+  document.getElementById('actionButtons').innerHTML = buttons.map(b =>
+    `<button class="action-btn" onclick="${b.fn}">
+      <span class="action-icon">${b.icon}</span> ${b.text}
+    </button>`
+  ).join('');
+}
+
+function renderStatusEffects() {
+  const bar = document.getElementById('statusBar');
+  if (!player.statusEffects || player.statusEffects.length === 0) { bar.innerHTML = ''; return; }
+  bar.innerHTML = player.statusEffects.map(e => 
+    `<span class="status-badge ${e.type === 'buff' ? '' : 'debuff'}">${e.icon} ${e.name} (${e.turns})</span>`
+  ).join('');
+}
+
+function travelTo(locId) {
+  player.currentLocation = locId;
+  if (!player.visitedLocations.includes(locId)) player.visitedLocations.push(locId);
+  const loc = LOCATIONS.find(l => l.id === locId);
+  setStory(`Přicestoval jsi do oblasti ${loc.name}. ${loc.desc}.`);
+  renderLocation();
+  savePlayerData(player);
+}
+
+function goBack() {
+  const idx = LOCATIONS.findIndex(l => l.id === player.currentLocation);
+  if (idx > 0) {
+    travelTo(LOCATIONS[idx - 1].id);
+  }
+}
+
+function explore() {
+  const discoveries = [
+    '🌿 Nalezl jsi stará runa s legendou o Královně Močbaz...',
+    '💰 Mezi kořeny stromu jsi našel pytlík zlata! (+25 zlatých)',
+    '🧪 Starý mudrc ti dal lektvar za pomoc. (+1 lektvar HP)',
+    '🗡️ Poblíž jsi nalezl skrytou zbraň z minulých bitev.',
+    '💀 Nic jsi nenašel, jen kosti minulých dobrodruhů...',
+    '🌙 Temné kouzlo tě trochu poškodilo! (-10 HP)',
+    '✨ Magické světlušky tě uzdravily trochu! (+15 HP)',
+    '📜 Starobylý svitek odhalil slabinu nepřátel v této oblasti.',
+  ];
+  const pick = discoveries[Math.floor(Math.random() * discoveries.length)];
+  if (pick.includes('+25 zlatých')) player.gold += 25;
+  if (pick.includes('+1 lektvar')) player.potions.push('hpSmall');
+  if (pick.includes('-10 HP')) { player.hp = Math.max(1, player.hp - 10); updateHpBar(); }
+  if (pick.includes('+15 HP')) { player.hp = Math.min(player.maxHp, player.hp + 15); updateHpBar(); }
+  setStory(pick);
+  savePlayerData(player);
+}
+
+// ==================== COMBAT ====================
+function searchEnemy() {
+  const loc = LOCATIONS.find(l => l.id === player.currentLocation);
+  const enemyName = loc.enemies[Math.floor(Math.random() * loc.enemies.length)];
+  startCombat(enemyName);
+}
+
+function startBossFight() {
+  startCombat('Královna Močbaz', true);
+}
+
+function startCombat(enemyName, isBoss = false) {
+  const eData = ENEMIES_DATA[enemyName];
+  combat = {
+    enemyName,
+    isBoss,
+    enemyHp: eData.hp,
+    enemyMaxHp: eData.hp,
+    eData,
+    turn: 0,
+    fled: false,
+  };
+  document.getElementById('enemyArt').textContent = eData.icon;
+  document.getElementById('enemyName').textContent = enemyName;
+  updateEnemyHp();
+  document.getElementById('combatLog').textContent = `${eData.icon} ${enemyName} se zjevuje! Připrav se na boj!`;
+  document.getElementById('combatModal').classList.add('active');
+  document.getElementById('combatPotionBtn').disabled = player.potions.length === 0;
+}
+
+function updateEnemyHp() {
+  const pct = Math.max(0, (combat.enemyHp / combat.enemyMaxHp) * 100);
+  document.getElementById('enemyHpFill').style.width = pct + '%';
+  document.getElementById('enemyHpText').textContent = `${Math.max(0, combat.enemyHp)} / ${combat.enemyMaxHp} HP`;
+}
+
+function updateHpBar() {
+  const pct = Math.max(0, (player.hp / player.maxHp) * 100);
+  document.getElementById('hpFill').style.width = pct + '%';
+  document.getElementById('hpText').textContent = `${player.hp}/${player.maxHp}`;
+}
+
+function updateLives() {
+  for (let i = 1; i <= 3; i++) {
+    const el = document.getElementById('life' + i);
+    el.classList.toggle('lost', i > player.lives);
+  }
+}
+
+function combatAction(action) {
+  if (!combat) return;
+  let log = '';
+  const weaponBonus = player.equipped.weapon ? (ITEMS.find(it => it.id === player.equipped.weapon)?.bonus || 0) : 0;
+  const armorBonus = player.equipped.armor ? (ITEMS.find(it => it.id === player.equipped.armor)?.bonus || 0) : 0;
+
+  if (action === 'attack') {
+    const base = player.attack + weaponBonus;
+    const dmg = Math.floor(Math.random() * (base * 0.5) + base * 0.75);
+    combat.enemyHp -= dmg;
+    log = `⚔️ Zaútočil jsi za ${dmg} poškození!`;
+  } else if (action === 'magic') {
+    const magicDmg = Math.floor(Math.random() * 25) + 20;
+    combat.enemyHp -= magicDmg;
+    log = `🔮 Magický výboj zasáhl za ${magicDmg} poškození!`;
+  } else if (action === 'potion') {
+    if (player.potions.length === 0) { document.getElementById('combatLog').textContent = '❌ Žádné lektvary nemáš!'; return; }
+    const potionId = player.potions.shift();
+    const potion = POTIONS.find(p => p.id === potionId);
+    player.hp = Math.min(player.maxHp, player.hp + (potion.heal || 0));
+    updateHpBar();
+    document.getElementById('combatPotionBtn').disabled = player.potions.length === 0;
+    log = `🧪 Vypil jsi ${potion.name}! +${potion.heal} HP`;
+  } else if (action === 'flee') {
+    if (combat.isBoss) { document.getElementById('combatLog').textContent = '👑 Před Královnou Močbaz nelze utéct!'; return; }
+    if (Math.random() > 0.4) {
+      combat.fled = true;
+      document.getElementById('combatModal').classList.remove('active');
+      setStory('💨 Podařilo se ti utéct! Naštěstí jsi ztratil jen trochu dechu.');
+      savePlayerData(player);
+      return;
+    } else {
+      log = '💨 Pokusil ses utéct, ale nepodařilo se!';
+    }
+  }
+
+  updateEnemyHp();
+
+  if (combat.enemyHp <= 0) {
+    // Victory
+    document.getElementById('combatModal').classList.remove('active');
+    winCombat();
+    return;
+  }
+
+  // Enemy attacks
+  const [minD, maxD] = combat.eData.dmg;
+  const rawDmg = Math.floor(Math.random() * (maxD - minD + 1)) + minD;
+  const finalDmg = Math.max(1, rawDmg - armorBonus);
+  player.hp -= finalDmg;
+  updateHpBar();
+  log += ` | ${combat.eData.icon} ${combat.enemyName} tě zasáhl za ${finalDmg} poškození!`;
+
+  document.getElementById('combatLog').textContent = log;
+
+  if (player.hp <= 0) {
+    document.getElementById('combatModal').classList.remove('active');
+    loseCombat();
+  }
+}
+
+function winCombat() {
+  const eData = combat.eData;
+  const goldGain = eData.reward.gold + Math.floor(Math.random() * 10);
+  const xpGain = eData.reward.xp;
+  player.gold += goldGain;
+  player.xp += xpGain;
+  player.defeatedEnemies++;
+  player.hp = Math.min(player.maxHp, player.hp + 20); // small heal
+  updateHpBar();
+
+  let extra = '';
+  if (Math.random() < eData.reward.chance) {
+    const randomItem = ITEMS[Math.floor(Math.random() * ITEMS.length)];
+    if (!player.inventory.includes(randomItem.id)) {
+      player.inventory.push(randomItem.id);
+      extra = `\n🎁 Získal jsi: ${randomItem.icon} ${randomItem.name}!`;
+    }
+  }
+
+  // Random potion drop
+  if (Math.random() < 0.3) {
+    player.potions.push('hpSmall');
+    extra += '\n🧪 Nalezl jsi lektvar HP!';
+  }
+
+  if (combat.isBoss) {
+    player.defeatedBosses++;
+    player.wins++;
+    savePlayerData(player);
+    savePlayerData(player);
+    showResult('victory', '👑 KRÁLOVNA PORAŽENA!', `Neuvěřitelné! Porazil jsi Královnu Močbaz!\n+${goldGain} 💰 zlato | +${xpGain} ⭐ XP${extra}\n\nJsi legendou bažin!`, '🏆');
+    updateLeaderboard();
+  } else {
+    savePlayerData(player);
+    showResult('win', '⚔️ Vítězství!', `Porazil jsi ${combat.enemyName}!\n+${goldGain} 💰 zlato | +${xpGain} ⭐ XP${extra}`, '🎉');
+  }
+}
+
+function loseCombat() {
+  player.hp = Math.floor(player.maxHp * 0.4); // restore some HP
+  player.lives--;
+  updateLives();
+  updateHpBar();
+
+  if (player.lives <= 0) {
+    // Game over
+    player.lives = 3;
+    player.hp = player.maxHp;
+    player.gold = Math.floor(player.gold * 0.5);
+    player.currentLocation = 'swamp';
+    updateLives();
+    updateHpBar();
+    savePlayerData(player);
+    showResult('death', '💀 Hra skončena!', 'Ztratil jsi všechny životy...\nZbývá ti 50% zlata a začínáš znovu od začátku bažin.\n\nAle tvůj příběh pokračuje!', '💀');
+  } else {
+    savePlayerData(player);
+    showResult('lose', `❤️ Zbývá ti ${player.lives} ${player.lives === 1 ? 'život' : player.lives < 5 ? 'životy' : 'životů'}`, 
+      `Byl jsi poražen! Opravné kolo: zbývá ti ${player.lives} ${player.lives === 1 ? 'šance' : 'šance'}.\nObdržel jsi trochu HP zpět.`, '💔');
+  }
+}
+
+function showResult(type, title, text, icon) {
+  const box = document.getElementById('resultBox');
+  const t = document.getElementById('resultTitle');
+  box.className = 'modal-box';
+  if (type === 'victory' || type === 'win') { box.classList.add('victory'); t.className = 'modal-title gold'; }
+  else if (type === 'death' || type === 'lose') { box.classList.add('danger'); t.className = 'modal-title red'; }
+  else { t.className = 'modal-title green'; }
+  t.textContent = title;
+  document.getElementById('resultIcon').textContent = icon;
+  document.getElementById('resultText').textContent = text;
+  document.getElementById('resultModal').classList.add('active');
+}
+
+function closeResult() {
+  document.getElementById('resultModal').classList.remove('active');
+  renderLocation();
+  renderActions();
+}
+
+// ==================== SHOP ====================
+function openShop() {
+  const items = ITEMS.filter(it => !player.inventory.includes(it.id));
+  const potions = POTIONS;
+  
+  let html = `<div style="font-family:'Cinzel',serif; color:var(--gold); font-size:1.2rem; margin-bottom:12px;">🛒 Obchodník bažin</div>
+  <p style="color:var(--text-dim); margin-bottom:16px; font-style:italic;">Zlato: 💰 ${player.gold}</p>`;
+  
+  if (items.length > 0) {
+    html += '<p style="color:var(--swamp-glow); font-size:0.85rem; margin-bottom:10px;">VYBAVENÍ:</p>';
+    items.forEach(it => {
+      const price = 30 + it.bonus * 3;
+      html += `<div class="reward-item" style="cursor:pointer; margin-bottom:8px;" onclick="buyItem('${it.id}', ${price})">
+        <span class="reward-icon">${it.icon}</span>
+        <div><div class="reward-name">${it.name}</div><div class="reward-desc">${it.desc} | 💰 ${price} zlata</div></div>
+      </div>`;
+    });
+  }
+  
+  html += '<p style="color:var(--swamp-glow); font-size:0.85rem; margin:16px 0 10px;">LEKTVARY:</p>';
+  potions.forEach(p => {
+    html += `<div class="reward-item" style="cursor:pointer; margin-bottom:8px;" onclick="buyPotion('${p.id}')">
+      <span class="reward-icon">${p.icon}</span>
+      <div><div class="reward-name">${p.name}</div><div class="reward-desc">Léčí ${p.heal} HP | 💰 ${p.buy} zlata</div></div>
+    </div>`;
+  });
+  
+  setStory('');
+  document.getElementById('storyText').innerHTML = html + `<button class="btn-primary" style="margin-top:16px" onclick="renderLocation()">Zavřít obchod</button>`;
+}
+
+function buyItem(itemId, price) {
+  if (player.gold < price) { setStory('❌ Nemáš dost zlata!'); return; }
+  if (player.inventory.includes(itemId)) { setStory('✅ Tuto věc již vlastníš!'); return; }
+  player.gold -= price;
+  player.inventory.push(itemId);
+  const it = ITEMS.find(i => i.id === itemId);
+  setStory(`✅ Koupil jsi ${it.icon} ${it.name}! Zbývá ti 💰 ${player.gold} zlata.`);
+  savePlayerData(player);
+}
+
+function buyPotion(potionId) {
+  const p = POTIONS.find(p => p.id === potionId);
+  if (player.gold < p.buy) { setStory('❌ Nemáš dost zlata!'); return; }
+  player.gold -= p.buy;
+  player.potions.push(potionId);
+  setStory(`✅ Koupil jsi ${p.icon} ${p.name}! Zbývá ti 💰 ${player.gold} zlata.`);
+  savePlayerData(player);
+}
+
+// ==================== INVENTORY ====================
+function renderInventory() {
+  const grid = document.getElementById('inventoryGrid');
+  if (player.inventory.length === 0) {
+    grid.innerHTML = '<p style="color:var(--text-dim); font-style:italic;">Inventář je prázdný.</p>';
+  } else {
+    grid.innerHTML = player.inventory.map(id => {
+      const it = ITEMS.find(i => i.id === id);
+      if (!it) return '';
+      const isEquipped = Object.values(player.equipped).includes(id);
+      return `<div class="inv-item" onclick="toggleEquip('${id}')">
+        <span class="inv-icon">${it.icon}</span>
+        <span class="inv-name ${isEquipped ? 'equipped' : ''}">${it.name}${isEquipped ? ' ✓' : ''}</span>
+        <span style="font-size:0.75rem; color:var(--text-dim);">${it.desc}</span>
+      </div>`;
+    }).join('');
+  }
+
+  const pg = document.getElementById('potionsGrid');
+  if (player.potions.length === 0) {
+    pg.innerHTML = '<p style="color:var(--text-dim); font-style:italic;">Žádné lektvary.</p>';
+  } else {
+    const counts = {};
+    player.potions.forEach(p => { counts[p] = (counts[p] || 0) + 1; });
+    pg.innerHTML = Object.entries(counts).map(([id, count]) => {
+      const p = POTIONS.find(p => p.id === id);
+      if (!p) return '';
+      return `<div class="inv-item" onclick="usePotion('${id}')">
+        <span class="inv-icon">${p.icon}</span>
+        <span class="inv-name">${p.name} x${count}</span>
+        <span style="font-size:0.75rem; color:var(--text-dim);">Klikni pro použití (+${p.heal} HP)</span>
+      </div>`;
+    }).join('');
+  }
+
+  document.getElementById('invNote').textContent = `💰 Zlato: ${player.gold} | ⭐ XP: ${player.xp} | 👊 Útok: ${player.attack} | 🛡 Obrana: ${player.defense}`;
+  renderRenameSection();
+}
+
+function toggleEquip(itemId) {
+  const it = ITEMS.find(i => i.id === itemId);
+  if (!it) return;
+  if (player.equipped[it.type] === itemId) {
+    player.equipped[it.type] = null;
+  } else {
+    player.equipped[it.type] = itemId;
+  }
+  savePlayerData(player);
+  renderInventory();
+}
+
+function usePotion(id) {
+  const idx = player.potions.indexOf(id);
+  if (idx === -1) return;
+  const p = POTIONS.find(p => p.id === id);
+  if (player.hp >= player.maxHp) { alert('Máš plné HP!'); return; }
+  player.potions.splice(idx, 1);
+  player.hp = Math.min(player.maxHp, player.hp + p.heal);
+  updateHpBar();
+  savePlayerData(player);
+  renderInventory();
+}
+
+// ==================== PROGRESS MAP ====================
+function renderProgress() {
+  const map = document.getElementById('worldMap');
+  map.innerHTML = LOCATIONS.map(loc => {
+    const isVisited = player.visitedLocations.includes(loc.id);
+    const isCurrent = player.currentLocation === loc.id;
+    const isLocked = player.defeatedBosses < loc.bossRequired;
+    return `<div class="map-tile ${isCurrent ? 'current' : ''} ${isLocked ? 'locked' : ''} ${loc.isBoss ? 'boss-tile' : ''}" 
+      onclick="${!isLocked ? `travelTo('${loc.id}'); switchGameTab('explore');` : ''}">
+      <span class="map-icon">${loc.icon}</span>
+      <div>${loc.name}</div>
+      <div style="font-size:0.7rem; margin-top:4px; color:${isCurrent ? 'var(--gold)' : 'var(--text-dim)'};">
+        ${isCurrent ? '📍 Aktuální' : isLocked ? '🔒 Zamčeno' : isVisited ? '✅ Navštíveno' : '❓ Neznámo'}
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('bossProgress').textContent = 
+    `Poražení bossové: ${player.defeatedBosses} / ${LOCATIONS.length - 1} | Poražení nepřátelé: ${player.defeatedEnemies} | Vítězství nad Královnou: ${player.wins || 0}`;
+}
+
+// ==================== HALL OF FAME ====================
+function renderHallOfFame() {
+  const list = document.getElementById('hallList');
+  const usersWithData = Object.entries(state.users)
+    .filter(([,v]) => v.playerData)
+    .map(([u, v]) => ({ username: u, ...v.playerData }))
+    .sort((a, b) => (b.wins || 0) - (a.wins || 0) || (b.defeatedEnemies || 0) - (a.defeatedEnemies || 0));
+
+  if (usersWithData.length === 0) {
+    list.innerHTML = '<div class="user-item" style="justify-content:center; color:var(--text-dim); font-style:italic;">Žádní hrdinové zatím...</div>';
+    return;
+  }
+  const medals = ['🥇','🥈','🥉'];
+  list.innerHTML = usersWithData.map((u, i) => {
+    const isMe = u.username === state.currentUser;
+    return `<div class="user-item" style="${isMe ? 'background:rgba(212,168,67,0.1); border-color:rgba(212,168,67,0.4);' : ''}">
+      <span style="min-width:28px; text-align:center;">${medals[i] || `${i+1}.`}</span>
+      <span style="flex:1; ${isMe ? 'color:var(--gold-bright);' : ''}">${u.heroName || u.username}${isMe ? ' 👈' : ''}</span>
+      <span style="color:var(--text-dim); font-size:0.8rem;">👑 ${u.wins || 0}× | ⚔️ ${u.defeatedEnemies || 0}</span>
+    </div>`;
+  }).join('');
+}
+
+// ==================== RENAME HERO ====================
+function showRenameModal() {
+  if (player.nameChanged) {
+    alert('Jméno hrdiny lze změnit pouze jednou! Tuto možnost jsi již využil.');
+    return;
+  }
+  document.getElementById('renameInput').value = '';
+  document.getElementById('renameError').textContent = '';
+  document.getElementById('renameModal').classList.add('active');
+}
+
+function confirmRename() {
+  const n = document.getElementById('renameInput').value.trim();
+  const err = document.getElementById('renameError');
+  if (!n || n.length < 2) { err.textContent = 'Jméno musí mít alespoň 2 znaky!'; return; }
+  if (n.length > 20) { err.textContent = 'Jméno může mít nejvýše 20 znaků!'; return; }
+  player.heroName = n;
+  player.nameChanged = true;
+  savePlayerData(player);
+  document.getElementById('renameModal').classList.remove('active');
+  const isAdm = isAdmin(state.currentUser);
+  document.getElementById('displayName').textContent = isAdm ? `👑 ${player.heroName} [ADMIN]` : `⚔️ ${player.heroName}`;
+  renderInventory();
+}
+
+function renderRenameSection() {
+  const el = document.getElementById('renameSection');
+  if (!el) return;
+  if (player.nameChanged) {
+    el.innerHTML = `<p style="color:var(--text-dim); font-style:italic; font-size:0.9rem;">✅ Jméno hrdiny bylo již jednou změněno. (${player.heroName})</p>`;
+  } else {
+    el.innerHTML = `<div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+      <span style="color:var(--text-dim); font-size:0.95rem;">Aktuální jméno: <strong style="color:var(--gold);">${player.heroName}</strong></span>
+      <button class="btn-primary btn-gold" style="padding:8px 20px; font-size:0.85rem;" onclick="showRenameModal()">✏️ Změnit jméno (1×)</button>
+    </div>`;
+  }
+}
+
+// ==================== ANNOUNCEMENT ====================
+function checkAnnouncement() {
+  const stored = localStorage.getItem('mocbaz_announce');
+  if (!stored) { document.getElementById('announceBanner').classList.remove('visible'); return; }
+  const ann = JSON.parse(stored);
+  if (!ann.text) { document.getElementById('announceBanner').classList.remove('visible'); return; }
+  const dismissed = JSON.parse(localStorage.getItem('mocbaz_ann_dismissed') || '[]');
+  const key = state.currentUser + '_' + ann.id;
+  if (dismissed.includes(key)) { document.getElementById('announceBanner').classList.remove('visible'); return; }
+  // show modal popup on login
+  document.getElementById('announceViewText').textContent = ann.text;
+  document.getElementById('announceViewModal').classList.add('active');
+  // also show banner
+  document.getElementById('announceBannerText').textContent = ann.text;
+  document.getElementById('announceBanner').classList.add('visible');
+}
+
+function dismissAnnounce() {
+  document.getElementById('announceViewModal').classList.remove('active');
+  const stored = localStorage.getItem('mocbaz_announce');
+  if (!stored) return;
+  const ann = JSON.parse(stored);
+  const key = state.currentUser + '_' + ann.id;
+  const dismissed = JSON.parse(localStorage.getItem('mocbaz_ann_dismissed') || '[]');
+  if (!dismissed.includes(key)) dismissed.push(key);
+  localStorage.setItem('mocbaz_ann_dismissed', JSON.stringify(dismissed));
+  document.getElementById('announceBanner').classList.remove('visible');
+}
+
+// ==================== ADMIN ====================
+function showAdminPanel() {
+  renderAdminList(false);
+  const ann = JSON.parse(localStorage.getItem('mocbaz_announce') || 'null');
+  document.getElementById('currentAnnounce').textContent = ann && ann.text
+    ? `📢 Aktuální zpráva: "${ann.text}"`
+    : 'Žádná aktivní zpráva.';
+  document.getElementById('announceInput').value = ann && ann.text ? ann.text : '';
+  document.getElementById('adminModal').classList.add('active');
+}
+
+function adminLog(msg) {
+  document.getElementById('adminLog').textContent = '✅ ' + msg;
+}
+
+let adminShowingAll = false;
+
+function adminToggleAllPlayers() {
+  adminShowingAll = !adminShowingAll;
+  renderAdminList(adminShowingAll);
+}
+
+function adminSearchPlayer() {
+  const query = document.getElementById('adminSearchInput').value.trim().toLowerCase();
+  if (!query) { renderAdminList(true); return; }
+  renderAdminList(false, query);
+}
+
+function renderAdminList(showAll = false, searchQuery = '') {
+  const container = document.getElementById('adminPlayerList');
+  let users = Object.entries(state.users).filter(([u, v]) => v.playerData && !isAdmin(u));
+
+  if (searchQuery) {
+    users = users.filter(([u, v]) =>
+      (v.playerData.heroName || '').toLowerCase().includes(searchQuery) ||
+      u.toLowerCase().includes(searchQuery)
+    );
+  } else if (!showAll) {
+    container.innerHTML = `<p style="color:var(--text-dim); font-size:0.85rem; font-style:italic; margin-bottom:6px;">Použij hledání nebo klikni "Ukázat všechny" pro správu hráčů.</p>`;
+    return;
+  }
+
+  if (users.length === 0) {
+    container.innerHTML = '<p style="color:var(--text-dim); font-style:italic; font-size:0.9rem;">Žádní hráči nenalezeni.</p>';
+    return;
+  }
+  container.innerHTML = users.map(([username, data]) => {
+    const pd = data.playerData;
+    return `<div class="admin-user-row">
+      <div style="min-width:140px;">
+        <div class="admin-user-name">👤 ${pd.heroName || username}</div>
+        <div class="admin-user-stats">💰 ${pd.gold} | ❤️ ${pd.lives}/3 | 🗺️ ${pd.defeatedBosses} oblastí</div>
+      </div>
+      <input type="number" class="admin-input" id="goldInput_${username}" placeholder="zlato" min="1" max="99999">
+      <button class="btn-admin" onclick="adminGiveGold('${username}')">💰 Dát zlato</button>
+      <button class="btn-admin btn-admin-green" onclick="adminUnlockAll('${username}')">🗺️ Odemknout</button>
+      <button class="btn-admin" onclick="adminGiveLives('${username}')">❤️ +3 životy</button>
+      <button class="btn-admin btn-admin-red" onclick="adminResetPlayer('${username}')">🗑 Reset</button>
+    </div>`;
+  }).join('');
+}
+
+function adminGiveGold(username) {
+  const input = document.getElementById(`goldInput_${username}`);
+  const amount = parseInt(input.value);
+  if (isNaN(amount) || amount <= 0) { document.getElementById('adminLog').textContent = '❌ Zadej platnou částku!'; return; }
+  const pd = state.users[username].playerData;
+  pd.gold += amount;
+  if (state.currentUser === username) { player.gold = pd.gold; }
+  localStorage.setItem('mocbaz_users', JSON.stringify(state.users));
+  input.value = '';
+  adminLog(`Přidáno ${amount} 💰 hráči ${pd.heroName || username}. Celkem: ${pd.gold}`);
+  renderAdminList(adminShowingAll, document.getElementById('adminSearchInput').value.trim().toLowerCase());
+}
+
+function adminUnlockAll(username) {
+  const pd = state.users[username].playerData;
+  pd.defeatedBosses = 5;
+  pd.visitedLocations = ['swamp','forest','cave','island','ruins','palace'];
+  if (state.currentUser === username) {
+    player.defeatedBosses = 5;
+    player.visitedLocations = ['swamp','forest','cave','island','ruins','palace'];
+    renderProgress();
+    renderActions();
+  }
+  localStorage.setItem('mocbaz_users', JSON.stringify(state.users));
+  adminLog(`Odemčeny všechny mapy pro ${pd.heroName || username}!`);
+  renderAdminList(adminShowingAll, document.getElementById('adminSearchInput').value.trim().toLowerCase());
+}
+
+function adminGiveLives(username) {
+  const pd = state.users[username].playerData;
+  pd.lives = 3;
+  pd.hp = pd.maxHp;
+  if (state.currentUser === username) {
+    player.lives = 3;
+    player.hp = player.maxHp;
+    updateLives();
+    updateHpBar();
+  }
+  localStorage.setItem('mocbaz_users', JSON.stringify(state.users));
+  adminLog(`Obnoveny 3 životy hráči ${pd.heroName || username}!`);
+  renderAdminList(adminShowingAll, document.getElementById('adminSearchInput').value.trim().toLowerCase());
+}
+
+function adminResetPlayer(username) {
+  if (!confirm(`Opravdu resetovat hráče ${username}? Veškerý postup bude smazán!`)) return;
+  state.users[username].playerData = null;
+  localStorage.setItem('mocbaz_users', JSON.stringify(state.users));
+  adminLog(`Hráč ${username} byl resetován.`);
+  renderAdminList(adminShowingAll, document.getElementById('adminSearchInput').value.trim().toLowerCase());
+}
+
+function adminUnlockAllForAll() {
+  let count = 0;
+  Object.entries(state.users).forEach(([u, v]) => {
+    if (v.playerData && !isAdmin(u)) {
+      v.playerData.defeatedBosses = 5;
+      v.playerData.visitedLocations = ['swamp','forest','cave','island','ruins','palace'];
+      count++;
+    }
+  });
+  if (player) {
+    player.defeatedBosses = 5;
+    player.visitedLocations = ['swamp','forest','cave','island','ruins','palace'];
+    renderActions();
+  }
+  localStorage.setItem('mocbaz_users', JSON.stringify(state.users));
+  adminLog(`Všechny mapy odemčeny pro ${count} hráčů!`);
+  renderAdminList(adminShowingAll);
+}
+
+function adminResetAllConfirm() {
+  if (!confirm('VAROVÁNÍ: Toto smaže postup VŠECH hráčů (kromě adminů). Jsi si jistý?')) return;
+  Object.entries(state.users).forEach(([u, v]) => {
+    if (!isAdmin(u)) v.playerData = null;
+  });
+  localStorage.setItem('mocbaz_users', JSON.stringify(state.users));
+  adminLog('Všichni hráči byli resetováni.');
+  renderAdminList(adminShowingAll);
+}
+
+function adminSendAnnounce() {
+  const text = document.getElementById('announceInput').value.trim();
+  if (!text) { adminLog('Zpráva je prázdná!'); return; }
+  const ann = { text, id: Date.now() };
+  localStorage.setItem('mocbaz_announce', JSON.stringify(ann));
+  // clear dismissed list so everyone sees it fresh
+  localStorage.removeItem('mocbaz_ann_dismissed');
+  document.getElementById('currentAnnounce').textContent = `📢 Aktuální zpráva: "${text}"`;
+  // show banner for admin too
+  document.getElementById('announceBannerText').textContent = text;
+  document.getElementById('announceBanner').classList.add('visible');
+  adminLog('Zpráva odeslána všem hráčům!');
+}
+
+function adminClearAnnounce() {
+  localStorage.removeItem('mocbaz_announce');
+  localStorage.removeItem('mocbaz_ann_dismissed');
+  document.getElementById('currentAnnounce').textContent = 'Žádná aktivní zpráva.';
+  document.getElementById('announceInput').value = '';
+  document.getElementById('announceBanner').classList.remove('visible');
+  adminLog('Oznámení smazáno.');
+}
+
+// ==================== FOG PARTICLES ====================
+function createFog() {
+  const layer = document.getElementById('fogLayer');
+  for (let i = 0; i < 8; i++) {
+    const p = document.createElement('div');
+    p.className = 'fog-particle';
+    const size = Math.random() * 200 + 100;
+    p.style.cssText = `
+      width:${size}px; height:${size}px;
+      top:${Math.random() * 100}%;
+      animation-duration:${Math.random() * 20 + 20}s;
+      animation-delay:${Math.random() * -20}s;
+    `;
+    layer.appendChild(p);
+  }
+}
+
+createFog();
+
+// Keyboard enter support
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    const ls = document.getElementById('loginScreen');
+    if (document.getElementById('authScreen').classList.contains('active')) {
+      const loginVisible = document.getElementById('loginForm').style.display !== 'none';
+      if (loginVisible) login(); else register();
+    }
+  }
+});
+</script>
+</body>
 </html>
