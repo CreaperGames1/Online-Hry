@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Narozeninový portál 🎂</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'DM Sans',sans-serif;background:#f5f3ee;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem 1rem}
+  .screen{display:none;width:100%;max-width:480px;margin:0 auto}
+  .screen.active{display:block}
+  .card{background:#ffffff;border:1px solid #e8e5df;border-radius:16px;padding:2rem;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,0.06)}
+  h1{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:#1a1a1a;margin-bottom:0.5rem}
+  h2{font-family:'Playfair Display',serif;font-size:20px;font-weight:400;color:#1a1a1a;margin-bottom:1.5rem}
+  .subtitle{font-size:14px;color:#777;margin-bottom:2rem}
+  label{display:block;font-size:13px;color:#777;text-align:left;margin-bottom:6px;margin-top:1rem}
+  input[type=text],input[type=number]{width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:15px;color:#1a1a1a;background:#fff;outline:none;transition:border-color 0.2s}
+  input[type=text]:focus,input[type=number]:focus{border-color:#999}
+  .btn{display:block;width:100%;margin-top:1.5rem;padding:12px;background:#1a1a1a;color:#fff;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;cursor:pointer;transition:opacity 0.2s}
+  .btn:hover{opacity:0.85}
+  .btn-outline{background:transparent;color:#1a1a1a;border:1px solid #ccc}
+  .btn-outline:hover{background:#f5f3ee}
+  .error{color:#A32D2D;font-size:13px;margin-top:8px;text-align:left}
+  .emoji-big{font-size:48px;margin-bottom:1rem}
+  .code-display{font-family:'Courier New',monospace;font-size:28px;font-weight:700;letter-spacing:8px;color:#1a1a1a;background:#f5f3ee;border:1px solid #ddd;border-radius:10px;padding:1rem 1.5rem;margin:1.5rem 0;display:inline-block}
+  .photo-upload{border:2px dashed #ddd;border-radius:10px;padding:2rem;cursor:pointer;transition:border-color 0.2s;margin-top:1rem}
+  .photo-upload:hover{border-color:#999}
+  .photo-preview{width:120px;height:120px;border-radius:50%;object-fit:cover;margin:0 auto 1rem;display:block;border:3px solid #ddd}
+  .bday-photo{width:160px;height:160px;border-radius:50%;object-fit:cover;margin:0 auto 1.5rem;display:block;border:4px solid #e8e5df}
+  .age-badge{display:inline-block;background:#f5f3ee;border:1px solid #e8e5df;border-radius:40px;padding:6px 20px;font-size:14px;color:#777;margin-bottom:1.5rem}
+  .confetti-row{font-size:24px;letter-spacing:4px;margin:1rem 0}
+  .tabs{display:flex;gap:8px;margin-bottom:1.5rem}
+  .tab{flex:1;padding:10px;border:1px solid #ddd;border-radius:10px;background:transparent;font-family:'DM Sans',sans-serif;font-size:14px;color:#777;cursor:pointer;transition:all 0.2s}
+  .tab.active{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+  .saved-list{text-align:left}
+  .saved-item{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid #e8e5df;border-radius:10px;margin-bottom:8px}
+  .saved-avatar{width:40px;height:40px;border-radius:50%;background:#f5f3ee;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:18px;overflow:hidden}
+  .saved-avatar img{width:40px;height:40px;border-radius:50%;object-fit:cover}
+  .saved-info{flex:1}
+  .saved-name{font-size:14px;font-weight:500;color:#1a1a1a}
+  .saved-code{font-size:12px;color:#999;font-family:'Courier New',monospace;letter-spacing:2px}
+  .divider{border:none;border-top:1px solid #e8e5df;margin:1.5rem 0}
+  .wish-input{width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;color:#1a1a1a;background:#fff;resize:vertical;min-height:80px;margin-top:0.5rem}
+  .wish-bubble{background:#f5f3ee;border-radius:10px;padding:12px 16px;margin-bottom:8px;text-align:left;font-size:14px;color:#1a1a1a;line-height:1.6}
+  .wish-meta{font-size:12px;color:#999;margin-top:4px}
+  .empty-state{color:#999;font-size:14px;padding:2rem 0;text-align:center}
+  #file-input{display:none}
+  .copy-hint{font-size:12px;color:#999;margin-top:8px}
+  .delete-btn{font-size:12px;color:#A32D2D;background:none;border:none;cursor:pointer;padding:4px 8px;border-radius:4px}
+  .delete-btn:hover{background:#FCEBEB}
+  .wish-name{font-weight:500}
+  .org-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem}
+  .section-card{background:#fff;border:1px solid #e8e5df;border-radius:16px;padding:1.5rem;text-align:left;margin-bottom:1rem;box-shadow:0 2px 12px rgba(0,0,0,0.06)}
+  .section-title{font-size:16px;font-weight:500;color:#1a1a1a;margin-bottom:1rem}
+</style>
+</head>
+<body>
+
+<!-- SCREEN 1: Login -->
+<div class="screen active" id="screen-login">
+  <div class="card">
+    <div class="emoji-big">🎂</div>
+    <h1>Narozeninový portál</h1>
+    <p class="subtitle">Zadej svůj přístupový kód</p>
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('organizer')">Organizátor</button>
+      <button class="tab" onclick="switchTab('birthday')">Oslavenec</button>
+    </div>
+    <div id="tab-organizer">
+      <label>Kód organizátora</label>
+      <input type="text" id="org-code" placeholder="Zadej kód..." />
+      <div id="org-error" class="error" style="display:none">Špatný kód!</div>
+      <button class="btn" onclick="loginOrganizer()">Přihlásit se jako organizátor →</button>
+    </div>
+    <div id="tab-birthday" style="display:none">
+      <label>Tvůj narozeninový kód</label>
+      <input type="text" id="bday-code" placeholder="Zadej svůj kód..." />
+      <div id="bday-error" class="error" style="display:none">Kód nenalezen!</div>
+      <button class="btn" onclick="loginBirthday()">Zobrazit moji stránku →</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 2: Organizer Dashboard -->
+<div class="screen" id="screen-organizer">
+  <div style="max-width:480px;margin:0 auto">
+    <div class="org-header">
+      <h1 style="font-family:'Playfair Display',serif;font-size:22px;color:#1a1a1a">Organizátor</h1>
+      <button class="btn-outline btn" style="width:auto;margin-top:0;padding:8px 16px;font-size:13px" onclick="logout()">Odhlásit</button>
+    </div>
+    <div class="section-card">
+      <div class="section-title">Vytvořit novou narozeninovou stránku</div>
+      <label>Jméno oslavence</label>
+      <input type="text" id="new-name" placeholder="např. Tereza" />
+      <label>Věk</label>
+      <input type="number" id="new-age" placeholder="např. 25" min="1" max="120" />
+      <label>Přání od organizátora (volitelné)</label>
+      <textarea class="wish-input" id="new-wish" placeholder="Napiš osobní přání..."></textarea>
+      <label>Fotka oslavence</label>
+      <div class="photo-upload" onclick="document.getElementById('file-input').click()" id="photo-drop">
+        <div id="photo-placeholder" style="color:#999;font-size:14px;text-align:center">
+          <div style="font-size:32px;margin-bottom:8px">📷</div>
+          Klikni pro nahrání fotky
+        </div>
+        <img id="photo-preview-img" class="photo-preview" style="display:none" alt="náhled" />
+      </div>
+      <input type="file" id="file-input" accept="image/*" onchange="handlePhoto(this)" />
+      <div id="create-error" class="error" style="display:none"></div>
+      <button class="btn" onclick="createBirthday()">Vytvořit stránku ✨</button>
+    </div>
+    <div class="section-card">
+      <div class="section-title">Vytvořené stránky</div>
+      <div id="saved-list">
+        <div class="empty-state">Zatím žádné stránky</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 3: Birthday Created Success -->
+<div class="screen" id="screen-created">
+  <div class="card">
+    <div class="confetti-row">🎉🎊🎈</div>
+    <h1>Stránka vytvořena!</h1>
+    <p class="subtitle">Pošli oslavenci tento kód</p>
+    <div class="code-display" id="created-code-display"></div>
+    <p class="copy-hint">Oslavenec ho zadá na přihlašovací stránce v záložce „Oslavenec"</p>
+    <button class="btn" onclick="copyCode()">Kopírovat kód</button>
+    <button class="btn btn-outline" onclick="goToOrganizer()" style="margin-top:8px">← Zpět na přehled</button>
+  </div>
+</div>
+
+<!-- SCREEN 4: Birthday Page -->
+<div class="screen" id="screen-birthday">
+  <div class="card">
+    <div class="confetti-row">🥳🎂🎉</div>
+    <img id="bday-photo-display" class="bday-photo" src="" alt="foto oslavence" style="display:none"/>
+    <div id="bday-avatar" style="font-size:64px;margin-bottom:1rem;display:none">🎂</div>
+    <h1 id="bday-name-display"></h1>
+    <div class="age-badge" id="bday-age-display"></div>
+    <p id="bday-wish-display" style="font-size:15px;line-height:1.7;margin-bottom:1.5rem;color:#555"></p>
+    <hr class="divider" />
+    <div style="font-size:15px;font-weight:500;color:#1a1a1a;margin-bottom:1rem;text-align:left">Přání od přátel</div>
+    <div id="wishes-list" class="saved-list"></div>
+    <hr class="divider" />
+    <label>Napsat přání</label>
+    <input type="text" id="wish-author" placeholder="Tvoje jméno" style="margin-bottom:8px" />
+    <textarea class="wish-input" id="wish-text" placeholder="Napiš přání..."></textarea>
+    <button class="btn" onclick="sendWish()">Poslat přání 💌</button>
+    <button class="btn btn-outline" onclick="logout()" style="margin-top:8px">← Odhlásit</button>
+  </div>
+</div>
+
+<script>
+  const ORG_CODE = "ComputerSlunec0";
+  let pages = JSON.parse(localStorage.getItem('bday_pages') || '[]');
+  let currentPage = null;
+  let uploadedPhoto = null;
+
+  function savePagesLocal() {
+    try { localStorage.setItem('bday_pages', JSON.stringify(pages)); } catch(e) {}
+  }
+
+  function switchTab(tab) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-organizer').style.display = 'none';
+    document.getElementById('tab-birthday').style.display = 'none';
+    if (tab === 'organizer') {
+      document.querySelectorAll('.tab')[0].classList.add('active');
+      document.getElementById('tab-organizer').style.display = 'block';
+    } else {
+      document.querySelectorAll('.tab')[1].classList.add('active');
+      document.getElementById('tab-birthday').style.display = 'block';
+    }
+  }
+
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    window.scrollTo(0, 0);
+  }
+
+  function loginOrganizer() {
+    const code = document.getElementById('org-code').value.trim();
+    const err = document.getElementById('org-error');
+    if (code === ORG_CODE) {
+      err.style.display = 'none';
+      showScreen('screen-organizer');
+      renderSavedList();
+    } else {
+      err.style.display = 'block';
+      document.getElementById('org-code').style.borderColor = '#E24B4A';
+    }
+  }
+
+  function loginBirthday() {
+    const code = document.getElementById('bday-code').value.trim().toUpperCase();
+    const err = document.getElementById('bday-error');
+    const page = pages.find(p => p.code === code);
+    if (page) {
+      err.style.display = 'none';
+      currentPage = page;
+      showBirthdayPage(page);
+    } else {
+      err.style.display = 'block';
+      document.getElementById('bday-code').style.borderColor = '#E24B4A';
+    }
+  }
+
+  function handlePhoto(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      uploadedPhoto = e.target.result;
+      const img = document.getElementById('photo-preview-img');
+      img.src = uploadedPhoto;
+      img.style.display = 'block';
+      document.getElementById('photo-placeholder').style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function generateCode() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let code = '';
+    for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+    return code;
+  }
+
+  function createBirthday() {
+    const name = document.getElementById('new-name').value.trim();
+    const age = document.getElementById('new-age').value.trim();
+    const wish = document.getElementById('new-wish').value.trim();
+    const err = document.getElementById('create-error');
+    if (!name) { err.textContent = 'Zadej jméno oslavence'; err.style.display = 'block'; return; }
+    if (!age) { err.textContent = 'Zadej věk'; err.style.display = 'block'; return; }
+    err.style.display = 'none';
+    let code;
+    do { code = generateCode(); } while (pages.find(p => p.code === code));
+    const page = {
+      code, name, age: parseInt(age),
+      wish: wish || `Všechno nejlepší k ${age}. narozeninám, ${name}! 🎂`,
+      photo: uploadedPhoto || null,
+      wishes: [],
+      created: new Date().toISOString()
+    };
+    pages.push(page);
+    savePagesLocal();
+    document.getElementById('created-code-display').textContent = code;
+    uploadedPhoto = null;
+    document.getElementById('new-name').value = '';
+    document.getElementById('new-age').value = '';
+    document.getElementById('new-wish').value = '';
+    document.getElementById('file-input').value = '';
+    document.getElementById('photo-preview-img').style.display = 'none';
+    document.getElementById('photo-placeholder').style.display = 'block';
+    showScreen('screen-created');
+  }
+
+  function copyCode() {
+    const code = document.getElementById('created-code-display').textContent;
+    navigator.clipboard.writeText(code).catch(() => {});
+    const btn = event.target;
+    const orig = btn.textContent;
+    btn.textContent = 'Zkopírováno ✓';
+    setTimeout(() => btn.textContent = orig, 2000);
+  }
+
+  function goToOrganizer() {
+    showScreen('screen-organizer');
+    renderSavedList();
+  }
+
+  function renderSavedList() {
+    const el = document.getElementById('saved-list');
+    if (!pages.length) { el.innerHTML = '<div class="empty-state">Zatím žádné stránky</div>'; return; }
+    el.innerHTML = pages.map((p, i) => `
+      <div class="saved-item">
+        <div class="saved-avatar">
+          ${p.photo ? `<img src="${p.photo}" alt="${p.name}" />` : '🎂'}
+        </div>
+        <div class="saved-info">
+          <div class="saved-name">${p.name} (${p.age} let)</div>
+          <div class="saved-code">${p.code}</div>
+        </div>
+        <button class="delete-btn" onclick="deletePage(${i}, event)">Smazat</button>
+      </div>
+    `).join('');
+  }
+
+  function deletePage(i, e) {
+    e.stopPropagation();
+    if (confirm('Smazat tuto narozeninovou stránku?')) {
+      pages.splice(i, 1);
+      savePagesLocal();
+      renderSavedList();
+    }
+  }
+
+  function showBirthdayPage(page) {
+    const photoEl = document.getElementById('bday-photo-display');
+    const avatarEl = document.getElementById('bday-avatar');
+    if (page.photo) {
+      photoEl.src = page.photo;
+      photoEl.style.display = 'block';
+      avatarEl.style.display = 'none';
+    } else {
+      photoEl.style.display = 'none';
+      avatarEl.style.display = 'block';
+    }
+    document.getElementById('bday-name-display').textContent = `🎉 ${page.name}`;
+    document.getElementById('bday-age-display').textContent = `${page.age} let / roků`;
+    document.getElementById('bday-wish-display').textContent = page.wish;
+    renderWishes(page);
+    showScreen('screen-birthday');
+  }
+
+  function renderWishes(page) {
+    const el = document.getElementById('wishes-list');
+    if (!page.wishes || !page.wishes.length) {
+      el.innerHTML = '<div class="empty-state">Zatím žádná přání — buď první! 🎁</div>';
+      return;
+    }
+    el.innerHTML = page.wishes.map(w => `
+      <div class="wish-bubble">
+        <span class="wish-name">${w.name}:</span> ${w.text}
+        <div class="wish-meta">${new Date(w.time).toLocaleDateString('cs-CZ')}</div>
+      </div>
+    `).join('');
+  }
+
+  function sendWish() {
+    if (!currentPage) return;
+    const author = document.getElementById('wish-author').value.trim();
+    const text = document.getElementById('wish-text').value.trim();
+    if (!author || !text) { alert('Vyplň jméno a přání'); return; }
+    currentPage.wishes.push({ name: author, text, time: new Date().toISOString() });
+    const idx = pages.findIndex(p => p.code === currentPage.code);
+    if (idx >= 0) pages[idx] = currentPage;
+    savePagesLocal();
+    document.getElementById('wish-author').value = '';
+    document.getElementById('wish-text').value = '';
+    renderWishes(currentPage);
+  }
+
+  function logout() {
+    currentPage = null;
+    showScreen('screen-login');
+    document.getElementById('org-code').value = '';
+    document.getElementById('bday-code').value = '';
+    document.getElementById('org-error').style.display = 'none';
+    document.getElementById('bday-error').style.display = 'none';
+  }
+
+  document.getElementById('org-code').addEventListener('keydown', e => { if (e.key === 'Enter') loginOrganizer(); });
+  document.getElementById('bday-code').addEventListener('keydown', e => { if (e.key === 'Enter') loginBirthday(); });
+</script>
+</body>
+</html>
